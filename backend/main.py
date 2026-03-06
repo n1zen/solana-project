@@ -2,6 +2,11 @@
 
 from fastapi import FastAPI, Request, HTTPException, status
 
+from schemas import(
+    ProductCreate,
+    ProductResponse
+)
+
 app = FastAPI()
 
 products: list[dict] = [
@@ -25,13 +30,30 @@ products: list[dict] = [
 def home():
     return { "message": "hello world" }
 
+# create a new product
+@app.post("/api/products",
+    response_model=ProductResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+def create_product(product: ProductCreate):
+    new_id = max(p["id"] for p in products) + 1 if products else 1
+    new_product = {
+        "id": new_id,
+        "sku": product.sku,
+        "name": product.name,
+        "category": product.category,
+        "price": product.price
+    }
+    products.append(new_product)
+    return new_product
+
 # get all products
-@app.get("/api/products")
+@app.get("/api/products", response_model=list[ProductResponse])
 def get_all_products():
     return products
 
 # get product by id
-@app.get("/api/products/id/{product_id}")
+@app.get("/api/products/id/{product_id}", response_model=ProductResponse)
 def get_product_by_ID(product_id: int):
     for product in products:
         if product.get("id") == product_id:
@@ -42,7 +64,7 @@ def get_product_by_ID(product_id: int):
     )
 
 # get product by sku
-@app.get("/api/products/sku/{product_sku}")
+@app.get("/api/products/sku/{product_sku}", response_model=ProductResponse)
 def get_product_by_SKU(product_sku: int):
     for product in products:
         if product.get("sku") == product_sku:
