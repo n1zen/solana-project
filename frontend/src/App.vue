@@ -1,5 +1,8 @@
 <template>
+  <!-- Header -->
+  <!-- Body   -->
   <router-view/>
+  <!--Footer  -->
 </template>
 
 <style>
