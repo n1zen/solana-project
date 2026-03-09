@@ -8,8 +8,13 @@
                 <router-link to="/">Home</router-link>
                 <router-link to="/products">Products</router-link>
             </nav>
-            <button>
+            <button @click="toggleTheme">
                 <MoonIcon
+                    v-if="isDark"
+                    color="var(--text)"
+                />
+                <SunIcon 
+                    v-else
                     color="var(--text)"
                 />
             </button>
@@ -18,10 +23,24 @@
 </template>
 
 <script>
-import { MoonIcon } from 'lucide-vue-next';
+import { MoonIcon, SunIcon } from 'lucide-vue-next';
+import { ref, watch } from 'vue';
 export default {
     components: {
         MoonIcon,
+        SunIcon
+    },
+    setup() {
+        const isDark = ref(false)
+        // toggle light/dark mode
+        const toggleTheme = () => {
+            isDark.value = !isDark.value
+        }
+
+        watch(isDark, (dark) => {
+            document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light')
+        }, { immediate: true })
+        return { isDark, toggleTheme }
     }
 }
 </script>
@@ -30,11 +49,14 @@ export default {
     header {
         display: flex;
         justify-content: space-between;
-        margin: 0 var(--space-12);
-        padding-top: var(--space-2);
+        padding: var(--space-2) var(--space-24);
+        background: var(--bg);
+        border-bottom: var(--border-card);
+        box-shadow: var(--shadow);
     }
     h1 {
-        font-size: var(--text-xl)
+        font-size: var(--text-xl);
+        color: var(--logo);
     }
     .nav-container {
         display: flex;
@@ -45,6 +67,7 @@ export default {
         text-decoration: none;
         color: var(--text);
         margin: 0 var(--space-4);
+        cursor: pointer;
     }
     nav a:hover {
         color: var(--primary);
@@ -61,6 +84,6 @@ export default {
         justify-content: center;
     }
     button:hover {
-        background: var(--gradient);
+        background: var(--gradient-hover);
     }
 </style>
