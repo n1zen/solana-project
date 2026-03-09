@@ -51,6 +51,13 @@
     --success: oklch(0.7 0.05 160);
     --info: oklch(0.7 0.05 260);
 
+    --border-card: solid 1px var(--border);
+
+    --shadow: 0px 2px 2px hsla(0, 0%, 0%, 0.07), 0px 4px 4px hsla(0, 0%, 0%, 0.15);
+
+    --gradient: linear-gradient(0deg, var(--bg) 95%, var(--bg-light));
+    --gradient-hover: linear-gradient(0deg, var(--bg), var(--bg-light));
+
     /* --- Red Colors --- */
     --red-50: hsl(0, 100%, 97%);
     --red-100: hsl(0, 100%, 94%);
@@ -178,6 +185,8 @@ body.light {
     --warning: oklch(0.5 0.05 100);
     --success: oklch(0.5 0.05 160);
     --info: oklch(0.5 0.05 260);
+
+    --border-card: solid 1px var(--bg);
 }
 
 body {
