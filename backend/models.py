@@ -19,7 +19,7 @@ class Product(Base):
     category: Mapped[str] = mapped_column(String(120), unique=False, nullable=False)
     price: Mapped[int] = mapped_column(Integer, unique=False, nullable=False)
 
-    inventory: Mapped[list[InventoryItem]] = relationship(back_populates="product")
+    inventory: Mapped[list[InventoryItem]] = relationship(back_populates="product", cascade="all, delete-orphan",)
 
 # this is the table for InventoryItems
 class InventoryItem(Base):
@@ -36,6 +36,7 @@ class InventoryItem(Base):
     date_updated: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
     product: Mapped[Product] = relationship(back_populates="inventory")

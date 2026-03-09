@@ -5,9 +5,9 @@ from sqlalchemy import select
 
 import models
 
-# check if the item already exists in the database
+# check if the product already exists in the database
 # throw an exception if it does
-def does_exist(item: str, content: str, db):
+def product_exist(item: str, content: str, db):
     if item == "sku":
         result = db.execute(
             select(models.Product).where(models.Product.sku == content)
