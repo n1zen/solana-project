@@ -50,6 +50,101 @@
     --warning: oklch(0.7 0.05 100);
     --success: oklch(0.7 0.05 160);
     --info: oklch(0.7 0.05 260);
+
+    /* --- Red Colors --- */
+    --red-50: hsl(0, 100%, 97%);
+    --red-100: hsl(0, 100%, 94%);
+    --red-200: #ffc8c8;
+    --red-300: hsl(0, 100%, 82%);
+    --red-400: hsl(0, 99%, 71%);
+    --red-500: hsl(0, 92%, 60%);
+    --red-600: hsl(0, 79%, 51%);
+    --red-700: #c01515;
+    --red-800: hsl(0, 76%, 35%);
+    --red-900: hsl(0, 68%, 31%);
+    --red-950: hsl(0, 82%, 15%);
+
+    /* ── Spacing ── */
+    --space-1: 0.25rem;
+    /* 4px */
+    --space-2: 0.5rem;
+    /* 8px */
+    --space-3: 0.75rem;
+    /* 12px */
+    --space-4: 1rem;
+    /* 16px */
+    --space-5: 1.25rem;
+    /* 20px */
+    --space-6: 1.5rem;
+    /* 24px */
+    --space-8: 2rem;
+    /* 32px */
+    --space-10: 2.5rem;
+    /* 40px */
+    --space-12: 3rem;
+    /* 48px */
+    --space-16: 4rem;
+    /* 64px */
+    --space-20: 5rem;
+    /* 80px */
+    --space-24: 6rem;
+    /* 96px */
+    --space-32: 8rem;
+    /* 128px */
+
+    /* ── Font sizes ── */
+    --text-xs: 0.75rem;
+    /* 12px */
+    --text-sm: 0.875rem;
+    /* 14px */
+    --text-base: 1rem;
+    /* 16px */
+    --text-lg: 1.125rem;
+    /* 18px */
+    --text-xl: 1.25rem;
+    /* 20px */
+    --text-2xl: 1.5rem;
+    /* 24px */
+    --text-3xl: 1.875rem;
+    /* 30px */
+    --text-4xl: 2.25rem;
+    /* 36px */
+
+    /* ── Line heights ── */
+    --leading-tight: 1.25;
+    --leading-normal: 1.5;
+    --leading-relaxed: 1.75;
+
+    /* ── Border radii ── */
+    --radius-sm: 0.25rem;
+    /* 4px */
+    --radius-md: 0.5rem;
+    /* 8px */
+    --radius-lg: 0.75rem;
+    /* 12px */
+    --radius-xl: 1rem;
+    /* 16px */
+    --radius-2xl: 1.5rem;
+    /* 24px */
+    --radius-full: 9999px;
+
+    /* ── Container max-widths ── */
+    --max-w-sm: 24rem;
+    /* 384px */
+    --max-w-md: 28rem;
+    /* 448px */
+    --max-w-lg: 32rem;
+    /* 512px */
+    --max-w-xl: 36rem;
+    /* 576px */
+    --max-w-2xl: 42rem;
+    /* 672px */
+    --max-w-4xl: 56rem;
+    /* 896px */
+    --max-w-6xl: 72rem;
+    /* 1152px */
+    --max-w-7xl: 80rem;
+    /* 1280px */
 }
 
 body.light {
