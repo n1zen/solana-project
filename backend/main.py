@@ -1,10 +1,12 @@
 # FastAPI backend app
+from contextlib import asynccontextmanager
 from typing import Annotated
 
 from fastapi import FastAPI, HTTPException, status, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import select
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 import models
 from database import Base, engine, get_db
@@ -18,9 +20,16 @@ from schemas import(
 )
 from dependencies import product_exist
 
-Base.metadata.create_all(bind=engine)
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    # Startup
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+    # Shutdown
+    await engine.dispose()
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,10 +48,10 @@ def home():
     response_model=ProductResponse,
     status_code=status.HTTP_201_CREATED,
 )
-def create_product(product: ProductCreate, db: Annotated[Session, Depends(get_db)]):
+async def create_product(product: ProductCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     
-    product_exist("sku", product.sku, db)
-    product_exist("name", product.name, db)
+    await product_exist("sku", product.sku, db)
+    await product_exist("name", product.name, db)
     
     new_product = models.Product(
         sku = product.sku,
@@ -52,15 +61,15 @@ def create_product(product: ProductCreate, db: Annotated[Session, Depends(get_db
     )
 
     db.add(new_product)
-    db.commit()
-    db.refresh(new_product)
+    await db.commit()
+    await db.refresh(new_product)
     
     return new_product
 
 # get all products
 @app.get("/api/products", response_model=list[ProductResponse])
-def get_all_products(db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
+async def get_all_products(db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
         select(models.Product)
     )
     products = result.scalars().all()
@@ -68,8 +77,8 @@ def get_all_products(db: Annotated[Session, Depends(get_db)]):
 
 # get product by id
 @app.get("/api/products/id/{product_id}", response_model=ProductResponse)
-def get_product_by_ID(product_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
+async def get_product_by_ID(product_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
         select(models.Product).where(models.Product.id == product_id)
     )
     product = result.scalars().first()
@@ -82,8 +91,8 @@ def get_product_by_ID(product_id: int, db: Annotated[Session, Depends(get_db)]):
 
 # get product by sku
 @app.get("/api/products/sku/{product_sku}", response_model=ProductResponse)
-def get_product_by_SKU(product_sku: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
+async def get_product_by_SKU(product_sku: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
         select(models.Product).where(models.Product.sku == product_sku)
     )
     product = result.scalars().first()
@@ -96,8 +105,8 @@ def get_product_by_SKU(product_sku: int, db: Annotated[Session, Depends(get_db)]
 
 # update product using patch
 @app.patch("/api/products/{product_id}", response_model=ProductResponse)
-def update_product(product_id: int, product_update: ProductUpdate, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
+async def update_product(product_id: int, product_update: ProductUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
         select(models.Product).where(models.Product.id == product_id)
     )
     product = result.scalars().first()
@@ -108,10 +117,10 @@ def update_product(product_id: int, product_update: ProductUpdate, db: Annotated
         )
     
     if product_update.sku is not None and product_update.sku != product.sku:
-        product_exist("sku", product_update.sku, db)
+        await product_exist("sku", product_update.sku, db)
     
     if product_update.name is not None and product_update.name != product.name:
-        product_exist("name", product_update.name, db)
+        await product_exist("name", product_update.name, db)
 
     if product_update.sku is not None:
         product.sku = product_update.sku
@@ -122,15 +131,15 @@ def update_product(product_id: int, product_update: ProductUpdate, db: Annotated
     if product_update.price is not None:
         product.price = product_update.price
     
-    db.commit()
-    db.refresh(product)
+    await db.commit()
+    await db.refresh(product)
     return product
 
 # delete product
 @app.delete("/api/product/{product_id}",
             status_code=status.HTTP_204_NO_CONTENT)
-def delete_product(product_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
+async def delete_product(product_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
         select(models.Product).where(models.Product.id == product_id)
     )
     product = result.scalars().first()
@@ -139,14 +148,14 @@ def delete_product(product_id: int, db: Annotated[Session, Depends(get_db)]):
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Product not found"
         )
-    db.delete(product)
-    db.commit()
+    await db.delete(product)
+    await db.commit()
 
 # create inventory item
 @app.post("/api/inventory",
         response_model=InventoryItemResponse,
         status_code=status.HTTP_201_CREATED)
-def create_inventory_item(inventory_item: InventoryItemCreate, db: Annotated[Session, Depends(get_db)]):
+async def create_inventory_item(inventory_item: InventoryItemCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     new_inventory_item = models.InventoryItem(
         product_id = inventory_item.product_id,
         quantity = inventory_item.quantity,
@@ -154,24 +163,25 @@ def create_inventory_item(inventory_item: InventoryItemCreate, db: Annotated[Ses
     )
 
     db.add(new_inventory_item)
-    db.commit()
-    db.refresh(new_inventory_item)
+    await db.commit()
+    await db.refresh(new_inventory_item, attribute_names=["product"])
     return new_inventory_item
 
 # get all inventoryitems
 @app.get("/api/inventory", response_model=list[InventoryItemResponse])
-def get_inventory(db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
-        select(models.InventoryItem)
+async def get_inventory(db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
+        select(models.InventoryItem).options(selectinload(models.InventoryItem.product))
     )
     inventory = result.scalars().all()
     return inventory
 
 # get inventoryitem by id
 @app.get("/api/inventory/{inventory_id}", response_model=InventoryItemResponse)
-def get_inventory_item(inventory_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
-        select(models.InventoryItem).where(models.InventoryItem.id == inventory_id)
+async def get_inventory_item(inventory_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
+        select(models.InventoryItem).options(selectinload(models.InventoryItem.product))
+        .where(models.InventoryItem.id == inventory_id)
     )
     item = result.scalars().first()
     if item:
@@ -183,9 +193,10 @@ def get_inventory_item(inventory_id: int, db: Annotated[Session, Depends(get_db)
 
 # update inventory item
 @app.patch("/api/inventory/{inventory_id}", response_model=InventoryItemResponse)
-def update_inventory_item(inventory_id: int, item_update: InventoryItemUpdate, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
-        select(models.InventoryItem).where(models.InventoryItem.id == inventory_id)
+async def update_inventory_item(inventory_id: int, item_update: InventoryItemUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
+        select(models.InventoryItem).options(selectinload(models.InventoryItem.product))
+        .where(models.InventoryItem.id == inventory_id)
     )
     item = result.scalars().first()
     if not item:
@@ -200,14 +211,14 @@ def update_inventory_item(inventory_id: int, item_update: InventoryItemUpdate, d
     if item_update.product_id is not None:
         item.product_id = item_update.product_id
 
-    db.commit()
-    db.refresh(item)
+    await db.commit()
+    await db.refresh(item, attribute_names=["product"])
     return item
 
 # delete inventory item
 @app.delete("/api/inventory/{inventory_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_inventory_item(inventory_id: int, db: Annotated[Session, Depends(get_db)]):
-    result = db.execute(
+async def delete_inventory_item(inventory_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
         select(models.InventoryItem).where(models.InventoryItem.id == inventory_id)
     )
     item = result.scalars().first()
@@ -217,5 +228,5 @@ def delete_inventory_item(inventory_id: int, db: Annotated[Session, Depends(get_
             detail="Inventory of item not found."
         )
     
-    db.delete(item)
-    db.commit()
+    await db.delete(item)
+    await db.commit()

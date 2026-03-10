@@ -7,14 +7,14 @@ import models
 
 # check if the product already exists in the database
 # throw an exception if it does
-def product_exist(item: str, content: str, db):
+async def product_exist(item: str, content: str, db):
     if item == "sku":
-        result = db.execute(
+        result = await db.execute(
             select(models.Product).where(models.Product.sku == content)
         )
         message = "Product SKU already exists."
     elif item == "name":
-        result = db.execute(
+        result = await db.execute(
             select(models.Product).where(models.Product.name == content)
         )
         message = "Product NAME already exists."
