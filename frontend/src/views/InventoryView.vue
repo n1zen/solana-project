@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import InventoryTable from '@/components/InventoryTable.vue';
+import InventoryTable from '@/components/inventory/InventoryTable.vue';
 import getInventory from '@/composables/Inventory/getInventory';
 import addInventoryItem from '@/composables/Inventory/addInventoryItem';
 

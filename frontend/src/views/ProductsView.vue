@@ -28,10 +28,7 @@
         <!-- view of all products -->
     </div>
     <div class="container">
-        <h2>Products</h2>
-        <div class="products-container" v-for="product in products" :key="product.id">
-            <ProductCard :product="product" />
-        </div>
+        <ProductTable :products="products"/>
     </div>
 </template>
 
@@ -39,12 +36,12 @@
 // @ is an alias to /src
 import getProducts from '@/composables/Products/getProducts.js';
 import addProduct from '@/composables/Products/addProduct.js';
-import ProductCard from '@/components/ProductCard.vue';
+import ProductTable from '@/components/product/ProductTable.vue';
 
 export default {
     name: 'ProductsView',
     components: {
-        ProductCard,
+        ProductTable,
     },
     setup() {
         // on mount, show all products on a card
