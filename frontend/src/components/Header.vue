@@ -87,4 +87,7 @@ export default {
     button:hover {
         background: var(--gradient-hover);
     }
+    button:active {
+        box-shadow: none;
+    }
 </style>
