@@ -6,7 +6,7 @@ services:
     volumes:
       - ./backend:/app
     environment:
-      - DATABASE_URL=sqlite:///./dev.db
+      - DATABASE_URL=sqlite+aiosqlite:///./dev.db
   
   frontend:
     build: ./frontend
