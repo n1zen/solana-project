@@ -13,11 +13,5 @@
 </script>
 
 <style scoped>
-    .card {
-        border: 1px solid #ccc;
-        padding: 10px;
-        margin: 10px;
-        border-radius: 5px;
-        background-color: #f9f9f9;
-    }
+
 </style>
