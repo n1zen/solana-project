@@ -5,6 +5,7 @@
     --bg-light: hsl(0 0% 9%);
     --text: hsl(300 0% 95%);
     --text-muted: hsl(300 0% 69%);
+    --text-more-muted: hsl(0, 0%, 40%);
     --highlight: hsl(330 0% 39%);
     --border: hsl(0 0% 28%);
     --border-muted: hsl(300 0% 18%);
@@ -47,6 +48,7 @@
     --bg-light: hsl(300 50% 100%);
     --text: hsl(300 0% 4%);
     --text-muted: hsl(0 0% 28%);
+    --text-more-muted: hsl(0, 0%, 40%);
     --highlight: hsl(300 50% 100%);
     --border: hsl(0 0% 50%);
     --border-muted: hsl(340 0% 62%);

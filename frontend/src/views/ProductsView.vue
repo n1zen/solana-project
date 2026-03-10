@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h1>Products</h1>
+        <h2>Add new product</h2>
         <!-- Add new product form -->
         <div class="form-container">
             <form @submit.prevent="onSubmit">
@@ -26,8 +26,10 @@
             </form>
         </div>
         <!-- view of all products -->
-        <h3>Products</h3>
-        <div v-for="product in products" :key="product.id">
+    </div>
+    <div class="container">
+        <h2>Products</h2>
+        <div class="products-container" v-for="product in products" :key="product.id">
             <ProductCard :product="product" />
         </div>
     </div>
@@ -65,17 +67,26 @@ export default {
         align-items: center;
         flex-direction: column;
         width: 100%;
+        margin: var(--space-8) 0;
+    }
+    .products-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-4);
     }
     h1 {
         text-align: center;
     }
     .form-container {
-        background: var(--bg);
+        background: var(--gradient);
         padding: var(--space-5);
         border-radius: var(--radius-lg);
         border: var(--border-card);
         box-shadow: var(--shadow);
         border-top: var(--highlight);
+    }
+    .form-container:hover {
+        background: var(--gradient-hover);
     }
     form {
         display: flex;
@@ -89,9 +100,11 @@ export default {
     .input {
         max-width: 190px;
         height: 44px;
-        background-color: hsla(234, 50%, 4%, 0.039);
+        /* background-color: hsla(234, 50%, 4%, 0.039); */
+        background-color: var(--bg-dark);
         border-radius: .5rem;
         padding: 0 1rem;
+        color: var(--text);
         border: 2px solid transparent;
         font-size: 1rem;
         transition: border-color .3s cubic-bezier(.25,.01,.25,1) 0s, color .3s cubic-bezier(.25,.01,.25,1) 0s,background .2s cubic-bezier(.25,.01,.25,1) 0s;
@@ -102,17 +115,21 @@ export default {
         margin-bottom: .3rem;
         font-size: .9rem;
         font-weight: bold;
-        color: hsla(234, 50%, 4%, 0.6);
+        /* color: hsla(234, 50%, 4%, 0.6); */
+        color: var(--text-more-muted);
         transition: color .3s cubic-bezier(.25,.01,.25,1) 0s;
     }
 
     .input:hover, .input:focus, .input-group:hover .input {
         outline: none;
-        border-color: hsl(234, 50%, 4%);
+        /* border-color: hsl(234, 50%, 4%); */
+        border-color: var(--border);
     }
 
     .input-group:hover .label, .input:focus {
-        color: hsla(234, 50%, 4%, 0.761);
+        /* color: hsla(234, 50%, 4%, 0.761);
+         */
+        color: var(--text);
     }
     button {
         margin-top: var(--space-4);
@@ -130,5 +147,6 @@ export default {
     }
     button:active {
         box-shadow: none;
+        background-color: var(--bg);
     }
 </style>
