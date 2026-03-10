@@ -37,8 +37,8 @@
 
 <script>
 // @ is an alias to /src
-import getProducts from '@/composables/getProducts.js';
-import addProduct from '@/composables/addProduct.js';
+import getProducts from '@/composables/Products/getProducts.js';
+import addProduct from '@/composables/Products/addProduct.js';
 import ProductCard from '@/components/ProductCard.vue';
 
 export default {
