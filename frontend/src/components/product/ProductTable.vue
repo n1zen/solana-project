@@ -12,7 +12,16 @@
             <tr v-if="products.length === 0">
                 <td colspan="4">No Products Found</td>
             </tr>
-            <tr v-for="product in products" :key="product.id">
+            <tr v-for="product in products" :key="product.id"
+                class="clickable-row"
+                @click="$router.push({
+                    name: 'product_details',
+                    params: {id: product.id}
+                })"
+            >
+                <!-- <router-link :to="{ name: 'product_details', params: {id: product.id}}">
+                    
+                </router-link> -->
                 <td>{{ product.sku }}</td>
                 <td>{{ product.name }}</td>
                 <td>{{ product.category }}</td>
@@ -64,5 +73,13 @@ tr:last-child td:last-child {
 }
 tr:last-child td:first-child {
     border-bottom-left-radius: var(--radius-md);
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover td {
+    filter: brightness(1.1);
 }
 </style>
