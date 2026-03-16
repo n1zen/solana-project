@@ -10,10 +10,10 @@
                 <p class="price">₱{{ product.price }}</p>
             </div>
             <div class="actions">
-                <button class="edit">
+                <button class="edit" @click="$emit('edit')">
                     <PenLineIcon size="var(--text-base)"/>
                 </button>
-                <button class="delete">
+                <button class="delete" @click="$emit('delete')">
                     <Trash2Icon size="var(--text-base)"/>
                 </button>
             </div>
@@ -28,7 +28,8 @@
             PenLineIcon,
             Trash2Icon
         },
-        props: ['product']
+        props: ['product'],
+        emits: ['edit', 'delete'],
     }
 </script>
 
