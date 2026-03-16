@@ -13,7 +13,7 @@
                 <button class="edit" @click="$emit('edit')">
                     <PenLineIcon size="var(--text-base)"/>
                 </button>
-                <button class="delete">
+                <button class="delete" @click="$emit('delete')">
                     <Trash2Icon size="var(--text-base)"/>
                 </button>
             </div>
@@ -29,7 +29,7 @@
             Trash2Icon
         },
         props: ['product'],
-        emits: ['edit'],
+        emits: ['edit', 'delete'],
     }
 </script>
 
