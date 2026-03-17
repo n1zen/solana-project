@@ -39,6 +39,8 @@
     --gradient-hover: linear-gradient(0deg, var(--bg), var(--bg-light));
 
     --logo: var(--text);
+
+    --text-inverse: hsl(300 0% 4%);
 }
 
 :root[data-theme="light"] {
@@ -82,6 +84,8 @@
     --gradient-hover: linear-gradient(0deg, var(--bg), var(--bg-light));
 
     --logo: hsl(0, 79%, 45%);
+
+    --text-inverse: hsl(300 0% 95%);
 }
 
 :root {
