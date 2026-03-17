@@ -31,37 +31,58 @@
                         :is-selected="activeButton === 'Dashboard'"
                         :is-hovered="hoveredButton === 'Dashboard'"
                         :is-blurred="activeButton === 'Dashboard' && activeButton !== hoveredButton && hoveredButton !== null && hoveredButton !== 'Logout'" 
-                        text="Dashboard" @on-hover="buttonOnHover" @on-leave="buttonOnLeave" />
+                        text="Dashboard" 
+                        @on-hover="buttonOnHover" 
+                        @on-leave="buttonOnLeave"
+                        @on-click="changePage" />
                     <NavButton 
                         :is-selected="activeButton === 'Lifecycle'"
                         :is-hovered="hoveredButton === 'Lifecycle'" 
                         :is-blurred="activeButton === 'Lifecycle' && activeButton !== hoveredButton && hoveredButton !== null && hoveredButton !== 'Logout'" 
-                        :icon="buttonIcons.lifecycle" text="Lifecycle" @on-hover="buttonOnHover" @on-leave="buttonOnLeave" />
+                        :icon="buttonIcons.lifecycle" text="Lifecycle" 
+                        @on-hover="buttonOnHover" 
+                        @on-leave="buttonOnLeave" 
+                        @on-click="changePage" />
                     <NavButton 
                         :is-selected="activeButton === 'Analytics'"
                         :is-hovered="hoveredButton === 'Analytics'"
                         :is-blurred="activeButton === 'Analytics' && activeButton !== hoveredButton && hoveredButton !== null && hoveredButton !== 'Logout'" 
-                        :icon="buttonIcons.analytics" text="Analytics" @on-hover="buttonOnHover" @on-leave="buttonOnLeave" />
+                        :icon="buttonIcons.analytics" text="Analytics"
+                        @on-hover="buttonOnHover" 
+                        @on-leave="buttonOnLeave"
+                        @on-click="changePage" />
                     <NavButton 
                         :is-selected="activeButton === 'Projects'" 
                         :is-hovered="hoveredButton === 'Projects'"
                         :is-blurred="activeButton === 'Projects' && activeButton !== hoveredButton && hoveredButton !== null && hoveredButton !== 'Logout'" 
-                        :icon="buttonIcons.projects" text="Projects" @on-hover="buttonOnHover" @on-leave="buttonOnLeave" />
+                        :icon="buttonIcons.projects" text="Projects" 
+                        @on-hover="buttonOnHover" 
+                        @on-leave="buttonOnLeave"
+                        @on-click="changePage" />
                     <NavButton 
                         :is-selected="activeButton === 'Teams'" 
                         :is-hovered="hoveredButton === 'Teams'"
                         :is-blurred="activeButton === 'Teams' && activeButton !== hoveredButton && hoveredButton !== null && hoveredButton !== 'Logout'" 
-                        :icon="buttonIcons.teams" text="Teams" @on-hover="buttonOnHover" @on-leave="buttonOnLeave" />
+                        :icon="buttonIcons.teams" text="Teams" 
+                        @on-hover="buttonOnHover" 
+                        @on-leave="buttonOnLeave"
+                        @on-click="changePage" />
                     <NavButton 
                         :is-selected="activeButton === 'Inventory'" 
                         :is-hovered="hoveredButton === 'Inventory'"
                         :is-blurred="activeButton === 'Inventory' && activeButton !== hoveredButton && hoveredButton !== null && hoveredButton !== 'Logout'" 
-                        :icon="buttonIcons.inventory" text="Inventory" @on-hover="buttonOnHover" @on-leave="buttonOnLeave" />
+                        :icon="buttonIcons.inventory" text="Inventory" 
+                        @on-hover="buttonOnHover" 
+                        @on-leave="buttonOnLeave"
+                        @on-click="changePage" />
                     <NavButton 
                         :is-selected="activeButton === 'Products'" 
                         :is-hovered="hoveredButton === 'Products'"
                         :is-blurred="activeButton === 'Products' && activeButton !== hoveredButton && hoveredButton !== null && hoveredButton !== 'Logout'" 
-                        :icon="buttonIcons.products" text="Products" @on-hover="buttonOnHover" @on-leave="buttonOnLeave" />
+                        :icon="buttonIcons.products" text="Products" 
+                        @on-hover="buttonOnHover" 
+                        @on-leave="buttonOnLeave"
+                        @on-click="changePage" />
                 </div>
             </div>
         </div>
@@ -76,9 +97,13 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
 
 import NavButton from '@/components/Buttons/NavButton/NavButton.vue';
+
+const router = useRouter();
+const route = useRoute();
 
 const buttonIcons = {
     lifecycle: `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -138,9 +163,16 @@ const buttonIcons = {
 const activeButton = ref('Dashboard'); // Dashboard as default
 const hoveredButton = ref(null);
 
+watch(route, () => {
+    activeButton.value = route.name.charAt(0).toUpperCase() + route.name.slice(1);
+});
+
 // FROM CHILD EMITS
-function buttonActive(buttonName) {
-    activeButton.value = buttonName;
+function changePage(pageName) {
+    if (activeButton.value === pageName) return;
+
+    activeButton.value = pageName;
+    router.push(`/${pageName.toLowerCase()}`)
 };
 
 function buttonOnHover(buttonName) {

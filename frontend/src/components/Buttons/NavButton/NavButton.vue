@@ -1,8 +1,20 @@
 <template>
     <div class="cont-nav-item">
-        <button class="nav-item" :class="[isSelected ? 'isSelected' : '', isHovered ? 'isSelected' : '', isBlurred ? 'isBlurred' : '', isLogout ? 'isLogout' : '']" @mouseenter="onHover" @mouseleave="onLeave">
-            <div class="item-svg" ref="cont_itemSVG"></div>
-            <span class="item-text">{{ text }}</span>
+        <button 
+            class="nav-item" 
+            :class="[
+                isSelected ? 'isSelected' : '', 
+                isHovered ? 'isSelected' : '', 
+                isBlurred ? 'isBlurred' : '', 
+                isLogout ? 'isLogout' : ''
+            ]" 
+            @mouseenter="onHover" 
+            @mouseleave="onLeave" 
+            @click="onClick">
+            <div class="item-svg" 
+                ref="cont_itemSVG"></div>
+            <span 
+                class="item-text">{{ text }}</span>
         </button>
     </div>
 </template>
@@ -58,7 +70,7 @@ onMounted(() => {
     cont_itemSVG.value.appendChild(svgIcon);
 })
 
-const emit = defineEmits(['onHover', 'onLeave']);
+const emit = defineEmits(['onHover', 'onLeave', 'onClick']);
 
 function onHover() {
     emit('onHover', props.text);
@@ -66,6 +78,10 @@ function onHover() {
 
 function onLeave() {
     emit('onLeave');
+};
+
+function onClick() {
+    emit('onClick', props.text);
 };
 </script>
 

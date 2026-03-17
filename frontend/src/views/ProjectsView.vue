@@ -1,7 +1,7 @@
 <template>
-    <div class="page"id="page-dashboard">
-        <div id="dashboard">
-            <h1>Dashboard</h1>
+    <div class="page" id="page-projects">
+        <div id="products">
+            <h1>Projects</h1>
             <h2>W.I.P</h2>
         </div>
     </div>
@@ -11,5 +11,4 @@
 </script>
 
 <style scoped>
-    
 </style>
