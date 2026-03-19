@@ -43,11 +43,6 @@ async def user_exist(item: str, content: str, db):
             ),
         )
         message = "Email is already registered!"
-    elif item == "id":
-        result = await db.execute(
-            select(models.User).where(models.User.id == content)
-        )
-        message = "User already exists!"
     existing_user = result.scalars().first()
     if existing_user:
         raise HTTPException(
