@@ -271,3 +271,4 @@ backend/routers/__pycache__/inventory.cpython-311.pyc
 backend/routers/__pycache__/__init__.cpython-313.pyc
 backend/routers/__pycache__/inventory.cpython-313.pyc
 backend/routers/__pycache__/products.cpython-313.pyc
+backend/routers/__pycache__/users.cpython-311.pyc
