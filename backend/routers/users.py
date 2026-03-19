@@ -22,7 +22,7 @@ from dependencies import user_exist
 
 router = APIRouter()
 
-# create a user
+# create a user (User Registration)
 @router.post(
     "",
     response_model=UserPrivate,
@@ -44,7 +44,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
     await db.refresh(new_user)
     return new_user
 
-# login for access token
+# login for access token (for login)
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
@@ -76,7 +76,7 @@ async def login_for_access_token(
     )
     return Token(access_token=access_token, token_type="bearer")
 
-# get current user
+# get current user (Get the current LOGGED IN user)
 @router.get("/me", response_model=UserPrivate)
 async def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
