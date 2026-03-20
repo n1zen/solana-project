@@ -1,5 +1,5 @@
 <template>
-    <Nav />
+    <!-- <Nav /> -->
     <main> 
       <RouterView />
     </main>

@@ -29,6 +29,10 @@ const router = createRouter({
       redirect: { name: 'dashboard' }
     },
     {
+      path: '/',
+      redirect: { name: 'dashboard' }
+    },
+    {
       path: '/lifecycle',
       name: 'lifecycle',
       component: LifecycleView
