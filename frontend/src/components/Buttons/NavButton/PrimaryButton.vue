@@ -5,10 +5,10 @@
                 backgroundColor: isHovered ? 'var(--color-primary)' : bgColor, 
                 border: isHovered ? '2px solid var(--color-secondary)' : '2px solid transparent'
             }" 
-            :class="{ 'with-icon': icon }"
+            :class="{ 'with-icon': hasIcon }"
             @click="handleClick"
-            @mouseenter="isHovered = true"
-            @mouseleave="isHovered = false"
+            @mouseenter="isHovered = true; handleOnHover()"
+            @mouseleave="isHovered = false; handleOnLeave()"
             >
             <div id="icon">
                 <slot name="sIcon"></slot>
@@ -39,11 +39,17 @@ const props = defineProps({
     txtColor: {
         type: String,
         default: 'var(--color-primary)'
+    },
+    hasIcon: {
+        type: Boolean,
+        default: false
     }
 });
 
 const emits = defineEmits([
-    'onClick'
+    'onClick',
+    'onHover',
+    'onLeave'
 ]);
 
 const isHovered = ref(false);
@@ -51,6 +57,14 @@ const isHovered = ref(false);
 function handleClick() {
     console.log(`PrimaryButton clicked: ${props.text}`);
     emits('onClick');
+}
+
+function handleOnHover() {
+    emits('onHover')
+}
+
+function handleOnLeave() {
+    emits('onLeave')
 }
 </script>
 
@@ -60,6 +74,10 @@ button {
     cursor: pointer;
     padding: 7px 16px;
     transition: 0.3s;
+    display: flex;
+    gap: 7px;
+    align-items: center;
+    justify-content: center;
 }
 
 button.with-icon {
@@ -68,6 +86,6 @@ button.with-icon {
 }
 
 #text {
-    transition: 0.3s
+    transition: 0.3s;
 }
 </style>

@@ -68,6 +68,8 @@ const props = defineProps({
 const editOnHover = ref(false);
 const deleteOnHover = ref(false);
 
+// const btnEditIconColor =
+
 const emit = defineEmits(['isClicked'])
 
 function handleClick() {

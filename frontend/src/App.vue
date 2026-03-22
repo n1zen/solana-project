@@ -27,6 +27,7 @@ main {
   min-width: 0;
 
   width: 100%;
+  padding-top: 90px;
   display: flex;
 }
 </style>
