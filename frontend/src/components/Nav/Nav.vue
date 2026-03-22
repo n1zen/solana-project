@@ -168,7 +168,6 @@ function buttonOnLeave() {
     --real-width: 320px;
 
     height: calc(100dvh - var(--margin-top-main));
-    padding-left: 50px;
     padding-bottom: var(--margin-top-main);
     display: flex;
     flex-direction: column;

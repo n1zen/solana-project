@@ -1,8 +1,10 @@
 <template>
-    <!-- <Nav /> -->
-    <main> 
+  <div class="container">
+    <Nav />
+    <main>
       <RouterView />
     </main>
+  </div>
 </template>
 
 <script setup>
@@ -11,17 +13,20 @@ import { RouterView } from 'vue-router'
 import Nav from './components/Nav/Nav.vue';
 </script>
 
-<style>
-#app {
-    background-color: var(--color-primary);
-    padding-top: var(--margin-top-main);
-    width: 100dvw;
-    min-height: 100dvh;
-    display: flex;
-    gap: 50px
+<style scoped>
+.container {
+  background-color: var(--color-primary);
+  padding: var(--margin-top-main) 25px 0;
+  width: 100%;
+  display: flex;
+  gap: 50px;
 }
 
 main {
-  width: 100%
+  flex: 1;
+  min-width: 0;
+
+  width: 100%;
+  display: flex;
 }
 </style>

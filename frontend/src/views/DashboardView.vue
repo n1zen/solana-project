@@ -1,8 +1,7 @@
 <template>
-    <div class="page"id="page-dashboard">
+    <div class="page" id="page-dashboard">
         <div id="dashboard">
             <h1>Dashboard</h1>
-            <h2>W.I.P</h2>
         </div>
     </div>
 </template>
@@ -11,5 +10,7 @@
 </script>
 
 <style scoped>
-    
+#dashboard {
+    width: 100%;
+}
 </style>
