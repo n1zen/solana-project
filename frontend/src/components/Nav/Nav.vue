@@ -134,7 +134,7 @@ import { ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { LayoutDashboard, Recycle, PackageSearch, LogOut, ChartLine, FolderGit2, HeartHandshake, ShelvingUnit } from 'lucide-vue-next';
 
-import NavButton from '@/components/Buttons/NavButton/NavButton.vue';
+import NavButton from '@/components/Buttons/NavButton.vue';
 
 const router = useRouter();
 const route = useRoute();
@@ -143,8 +143,10 @@ const activeButton = ref('Dashboard'); // Dashboard as default
 const hoveredButton = ref(null);
 
 watch(route, () => {
+    // Check if the url has changed
     activeButton.value = route.name.charAt(0).toUpperCase() + route.name.slice(1);
 });
+
 
 // FROM CHILD EMITS
 function changePage(pageName) {

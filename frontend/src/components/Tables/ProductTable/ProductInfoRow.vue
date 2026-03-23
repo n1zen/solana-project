@@ -27,7 +27,7 @@
                     size="20"
                     :color="editOnHover ? 'var(--color-accent)' : 'var(--color-primary)'"
                     :style="{ color: clickStatusFromParent ? 'var(--color-primary)' : '' }"
-                    @mouseenter.stop="handleMouseEnterOnEdit"    
+                    @mouseenter="handleMouseEnterOnEdit"    
                     @mouseleave="handleMouseLeaveOnEdit"    
                 />
             </button>

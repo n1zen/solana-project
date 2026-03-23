@@ -29,7 +29,7 @@ import { Plus } from 'lucide-vue-next';
 import { ref } from 'vue';
 
 import ProductTable from '@/components/Tables/ProductTable/ProductTable.vue';
-import PrimaryButton from '@/components/Buttons/NavButton/PrimaryButton.vue';
+import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 
 const btnAddIconColor = ref("#FFFAFA");
 

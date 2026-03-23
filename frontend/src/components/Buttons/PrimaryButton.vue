@@ -26,7 +26,6 @@
 
 <script setup>
 import { ref, defineProps, defineEmits } from 'vue';
-
 const props = defineProps({
     text: {
         type: String,
@@ -39,6 +38,10 @@ const props = defineProps({
     txtColor: {
         type: String,
         default: 'var(--color-primary)'
+    },
+    fontSize: {
+        type: Number,
+        default: 16
     },
     hasIcon: {
         type: Boolean,
@@ -87,5 +90,9 @@ button.with-icon {
 
 #text {
     transition: 0.3s;
+}
+
+#icon {
+    padding-bottom: 2px;
 }
 </style>
