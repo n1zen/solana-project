@@ -17,9 +17,39 @@
                 <p id="title">Add new item</p>
             </header>
             <section id="progress">
-
+                <SimpleProgressBar 
+                    :count="4"
+                    :progress-bars="progressValues"
+                    default-color="var(--color-secondary)"
+                    done-color="var(--color-valid)"
+                    @pass-init-values="catchInitProgressValues"
+                />
             </section>
             <form action="" method="post">
+                <BasicTextInput
+                    class="form-input"
+                    hint="SKU ID*"
+                    :input-i-d="1"
+                    @pass-value="getInputFromChild"
+                    />
+                    <BasicTextInput 
+                    class="form-input"
+                    hint="Product Name*"
+                    :input-i-d="2"
+                    @pass-value="getInputFromChild"
+                    />
+                    <BasicTextInput 
+                    class="form-input"
+                    hint="Category*"
+                    :input-i-d="3"
+                    @pass-value="getInputFromChild"
+                    />
+                    <BasicTextInput 
+                    class="form-input"
+                    hint="Price*"
+                    :input-i-d="4"
+                    @pass-value="getInputFromChild"
+                />
                 <div id="actions">
                     <NudeButton 
                         text="Reset"
@@ -50,12 +80,40 @@ import { ArrowLeft, Plus } from 'lucide-vue-next';
 
 import PrimaryButton from '../Buttons/PrimaryButton.vue';
 import NudeButton from '../Buttons/NudeButton.vue';
+import BasicTextInput from '../Inputs/BasicTextInput.vue';
+import SimpleProgressBar from '../ProgressBars/SimpleProgressBar.vue';
 
 const btnCancelColor = ref('#505050b0')
 const btnAddIconColor = ref("#FFFAFA");
+const inputSKUID = ref('');
+const inputProductName = ref('');
+const inputCategory = ref('');
+const inputPrice = ref('');
+const progressValues = ref([]);
+
+function catchInitProgressValues(obj) {
+    progressValues.value = obj;
+};
 
 function changeButtonAddIconColor() {
     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
+};
+
+function getInputFromChild(obj) {
+    if (obj.inputID === 1) { 
+        inputSKUID.value = obj.value;
+        progressValues.value[0].status = obj.value !== '' ? true : false;
+        
+    } else if (obj.inputID === 2) {
+        inputProductName.value = obj.value;
+        progressValues.value[1].status = obj.value !== '' ? true : false;
+    } else if (obj.inputID === 3) {
+        inputCategory.value = obj.value;
+        progressValues.value[2].status = obj.value !== '' ? true : false;
+    } else { 
+        inputPrice.value = obj.value;
+        progressValues.value[3].status = obj.value !== '' ? true : false;
+    };
 };
 </script>
 
@@ -74,8 +132,20 @@ function changeButtonAddIconColor() {
     font-weight: bold;
 }
 
+header {
+    margin-bottom: 5px;
+}
+
 #return {
     margin-bottom: 15px;
+}
+
+#progress {
+    margin-bottom: 15px;
+}
+
+.form-input {
+    margin-bottom: 20px;
 }
 
 #actions {
