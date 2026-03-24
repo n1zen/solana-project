@@ -23,20 +23,12 @@
             </thead>
             <tbody>
                 <ProductInfoRow
-                    :index="1"
-                    :clickStatusFromParent="activeProductIndex === 1"
+                    v-for="id in productList.length"
+                    :productInfo="productList[id - 1]"
+                    :index="id"
+                    :clickStatusFromParent="activeProductIndex === id"
                     @isClicked="changeClickedProductInfo" 
                     />
-                <ProductInfoRow 
-                    :index="2"
-                    :clickStatusFromParent="activeProductIndex === 2"
-                    @isClicked="changeClickedProductInfo" 
-                />
-                <ProductInfoRow
-                    :index="3"
-                    :clickStatusFromParent="activeProductIndex === 3"
-                    @isClicked="changeClickedProductInfo" 
-                />
             </tbody>
         </table>
     </div>
@@ -45,9 +37,16 @@
 <script setup>
 import { ref } from 'vue';
 
+import getAllProducts from '@/modules/product/getAllProducts';
+
 import ProductInfoRow from './ProductInfoRow.vue';
 
 const activeProductIndex = ref(null);
+const { products, error, load } = getAllProducts();
+
+// Get products
+load();
+const productList = products;
 
 function changeClickedProductInfo(indexFromChild) {
     activeProductIndex.value = indexFromChild;

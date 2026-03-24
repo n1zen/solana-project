@@ -8,6 +8,7 @@
                         :text="'New Product'" 
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
+                        @on-click=""
                     >
                         <template #sIcon>
                              <Plus 
@@ -30,11 +31,16 @@ import { ref } from 'vue';
 
 import ProductTable from '@/components/Tables/ProductTable/ProductTable.vue';
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
+import ProductCRUD from '@/components/Modals/ProductCRUD.vue';
 
 const btnAddIconColor = ref("#FFFAFA");
 
 function changeButtonAddIconColor() {
     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
+};
+
+function addNewProduct() {
+
 };
 </script>
 

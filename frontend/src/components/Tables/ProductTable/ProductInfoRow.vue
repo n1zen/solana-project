@@ -2,16 +2,16 @@
     <tr class="product-info" :class="[clickStatusFromParent ? 'isClicked' : '']" @click="handleClick">
         <td class="product-id">
             <input type="checkbox" name="" id="">
-            <span class="">250001</span>
+            <span class="">{{ productInfo.sku }}</span>
         </td>
         <td class="product-name">
-            Cat in Box
+            {{ productInfo.name }}
         </td>
         <td class="product-category">
-            Animal
+            {{ productInfo.category }}
         </td>
         <td class="product-price">
-            ₱ 100
+            {{ productInfo.price }}
         </td>
         <td class="actions">
             <button class="edit">
@@ -62,13 +62,15 @@ const props = defineProps({
     clickStatusFromParent: {
         type: Boolean,
         default: false
+    },
+    productInfo: {
+        type: Object,
+        required: true
     }
 });
 
 const editOnHover = ref(false);
 const deleteOnHover = ref(false);
-
-// const btnEditIconColor =
 
 const emit = defineEmits(['isClicked'])
 
