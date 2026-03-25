@@ -1,23 +1,20 @@
 import { ref } from 'vue';
 
-const addProduct = (loadProducts) => {
+const addProduct = (newItem) => {
 
-    const sku = ref(null);
-    const name = ref('');
-    const category = ref('');
-    const price = ref(null);
     const error = ref(null);
 
     const onSubmit = async () => {
+        console.log(newItem);
         try {
-            const response = await fetch(`${process.env.VUE_APP_API_URL}/api/products`, {
+            const response = await fetch(`http://localhost:8000/api/products`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    sku: sku.value,
-                    name: name.value,
-                    category: category.value,
-                    price: price.value
+                    sku: newItem.sku,
+                    name: newItem.name,
+                    category: newItem.category,
+                    price: newItem.price
                 })
             });
 
@@ -30,12 +27,6 @@ const addProduct = (loadProducts) => {
             }
 
             alert('Product added successfully');
-            // refresh the product list & clear the form
-            await loadProducts();
-            sku.value = null;
-            name.value = '';
-            category.value = '';
-            price.value = null;
         } catch (err) {
             error.value = err.message;
             alert(error.value);
@@ -43,7 +34,7 @@ const addProduct = (loadProducts) => {
         }
     }
 
-    return { sku, name, category, price, error, onSubmit };
+    return { error, onSubmit };
 }
 
 export default addProduct;

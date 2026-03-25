@@ -1,6 +1,6 @@
 <template>
     <div class="nude-button">
-        <button type="button">
+        <button type="button" @click="handleOnClick()">
             <div id="icon">
                 <slot name="sIcon"></slot>
             </div>
@@ -40,6 +40,14 @@ const props = defineProps({
         default: false
     }
 });
+
+const emits = defineEmits([
+    'onClick'
+]);
+
+function handleOnClick() {
+    emits('onClick');
+};
 </script>
 
 <style scoped>

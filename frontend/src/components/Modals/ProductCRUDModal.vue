@@ -1,11 +1,13 @@
 <template>
-    <div id="product-crud">
+    <div id="product-crud" @click.stop="">
         <div class="container">
             <section id="return">
                 <NudeButton 
                     text="Cancel" 
                     :txt-color="btnCancelColor" 
-                    :fn-size="14">
+                    :fn-size="14"
+                    @on-click="handleOnCancel()"
+                >
                     <template #sIcon>
                         <ArrowLeft 
                             size="12" 
@@ -25,7 +27,7 @@
                     @pass-init-values="catchInitProgressValues"
                 />
             </section>
-            <form action="" method="post">
+            <form action="" method="post" @submit.prevent="">
                 <BasicTextInput
                     class="form-input"
                     hint="SKU ID*"
@@ -60,6 +62,7 @@
                         :has-icon=true
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
+                        @on-click="handleOnSumbit"
                     >
                         <template #sIcon>
                              <Plus 
@@ -82,6 +85,39 @@ import PrimaryButton from '../Buttons/PrimaryButton.vue';
 import NudeButton from '../Buttons/NudeButton.vue';
 import BasicTextInput from '../Inputs/BasicTextInput.vue';
 import SimpleProgressBar from '../ProgressBars/SimpleProgressBar.vue';
+
+import addProduct from '@/modules/product/addProduct';
+import getAllProducts from '@/modules/product/getAllProducts';
+
+const emits = defineEmits([
+    'onCancel',
+    'onSubmit'
+]);
+
+// Cancels the modal
+function handleOnCancel() {
+    emits('onCancel');
+};
+
+function handleOnSumbit() {
+    const { error, onSubmit } = addProduct({
+        sku: inputSKUID.value,
+        name: inputProductName.value,
+        category: inputCategory.value,
+        price: inputPrice.value
+    });
+
+    onSubmit();
+
+    if (error !== null) {
+        emits('onSubmit');
+    };
+
+    const { product, err, load } = getAllProducts();
+    load();
+
+    console.log(product)
+};
 
 const btnCancelColor = ref('#505050b0')
 const btnAddIconColor = ref("#FFFAFA");
@@ -121,7 +157,7 @@ function getInputFromChild(obj) {
 .container {
     background-color: var(--color-primary);
     border-radius: 5px;
-    box-shadow: 0 4px 0 -1px var(--color-secondary);
+    box-shadow: -4px 4px 0 0 var(--color-secondary);
     width: 435px;
     min-height: 300px;
     padding: 30px 20px;

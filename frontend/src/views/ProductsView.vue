@@ -1,5 +1,17 @@
 <template>
     <div class="page" id="page-products">
+        <transition name="fade">
+            <Overlay 
+                v-if="isModalOpen"
+                @on-click="renderModal"
+            >
+                <template #sSurface>
+                    <ProductCRUDModal 
+                        @on-cancel="renderModal"
+                    />
+                </template>
+            </Overlay>
+        </transition>
         <div id="products">
             <section id="header">
                 <h1>Product List</h1>
@@ -8,7 +20,7 @@
                         :text="'New Product'" 
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
-                        @on-click=""
+                        @on-click="renderModal"
                     >
                         <template #sIcon>
                              <Plus 
@@ -31,32 +43,45 @@ import { ref } from 'vue';
 
 import ProductTable from '@/components/Tables/ProductTable/ProductTable.vue';
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
-import ProductCRUD from '@/components/Modals/ProductCRUD.vue';
+import ProductCRUDModal from '@/components/Modals/ProductCRUDModal.vue';
+import Overlay from '@/components/Modals/Overlay.vue';
 
 const btnAddIconColor = ref("#FFFAFA");
+const isModalOpen = ref(false);
 
 function changeButtonAddIconColor() {
     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
 };
 
-function addNewProduct() {
-
+// Renders the modal
+function renderModal() {
+    isModalOpen.value = !isModalOpen.value;
 };
 </script>
 
 <style scoped>
-    #products {
-        width: 100%;
-    }
+#products {
+    width: 100%;
+}
 
-    #header {
-        margin-bottom: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
+#header {
+    margin-bottom: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
 
-    #header h1 {
-        color: var(--color-secondary);
-    }
+#header h1 {
+    color: var(--color-secondary);
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.3s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
 </style>

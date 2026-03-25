@@ -22,20 +22,20 @@
                 </tr>
             </thead>
             <tbody>
-                <ProductInfoRow
-                    v-for="id in productList.length"
-                    :productInfo="productList[id - 1]"
+                <ProductInfoRow 
+                    v-for="id in productList.length" 
+                    :productInfo="productList[id - 1]" 
                     :index="id"
-                    :clickStatusFromParent="activeProductIndex === id"
+                    :clickStatusFromParent="activeProductIndex === id" 
                     @isClicked="changeClickedProductInfo" 
-                    />
+                />
             </tbody>
         </table>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 import getAllProducts from '@/modules/product/getAllProducts';
 
@@ -43,10 +43,17 @@ import ProductInfoRow from './ProductInfoRow.vue';
 
 const activeProductIndex = ref(null);
 const { products, error, load } = getAllProducts();
+const productList = ref([])
 
 // Get products
-load();
-const productList = products;
+onMounted(async () => {
+    await load();
+    
+    if (error.value === null) {
+        console.log(products.value);
+        productList.value = products.value;
+    };
+})
 
 function changeClickedProductInfo(indexFromChild) {
     activeProductIndex.value = indexFromChild;
