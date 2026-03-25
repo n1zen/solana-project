@@ -1,0 +1,32 @@
+@import "./css-reset-jc.css";
+@import url('https://fonts.cdnfonts.com/css/sofia-sans');
+
+@font-face {
+    font-family: "SolanaAtelier";
+    src: url("../assets/fonts/solana-atelier.ttf") format("truetype");
+}
+
+:root {
+    --color-primary: #FFFAFA;
+    --color-secondary: #C84A46;
+    --color-accent: #505050;
+    --color-valid: #46C869;
+
+    --margin-top-main: 40px;
+}
+
+html {
+    overflow-x: hidden;
+}
+
+#app {
+    width: 100dvw;
+    min-height: 50dvh;
+    display: flex;
+    font-family: 'Sofia Sans', sans serif;
+}
+
+.page {
+    width: 100%;
+    display: flex;
+}

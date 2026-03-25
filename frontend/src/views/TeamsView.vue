@@ -1,7 +1,7 @@
 <template>
-    <div class="page" id="page-inventory">
-        <div id="inventory">
-            <h1>Inventory</h1>
+    <div class="page" id="page-teams">
+        <div id="teams">
+            <h1>Teams</h1>
             <h2>W.I.P</h2>
         </div>
     </div>
