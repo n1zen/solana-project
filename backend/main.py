@@ -3,6 +3,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from scalar_fastapi import get_scalar_api_reference
 
 from database import Base, engine, get_db
 
@@ -38,3 +39,10 @@ app.include_router(inventory.router, prefix="/api/inventory", tags=["inventory"]
 @app.get("/")
 def home():
     return { "message": "hello world" }
+
+@app.get("/scalar", include_in_schema=False)
+async def scalar_html():
+    return get_scalar_api_reference(
+        title="Solana Management System",
+        openapi_url=app.openapi_url,
+    )
