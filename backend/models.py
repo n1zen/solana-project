@@ -4,10 +4,23 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text
+from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
+from schemas import Role
+
+# this is the table for Users
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    username: Mapped[str] = mapped_column(String(120), unique=True, nullable=False)
+    lastname: Mapped[str] = mapped_column(String(120), unique=False, nullable=False)
+    firstname: Mapped[str] = mapped_column(String(120), unique=False, nullable=False)
+    email: Mapped[str]= mapped_column(String(120), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
+    role: Mapped[str] = mapped_column(SAEnum(Role), default=Role.user)
 
 # this is the table for Products
 class Product(Base):
