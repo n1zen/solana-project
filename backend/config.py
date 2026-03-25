@@ -9,5 +9,5 @@ class Settings(BaseSettings):
     )
 
     database_url: SecretStr
-
+    secret_key: SecretStr
 settings = Settings()
