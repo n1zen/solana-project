@@ -1,24 +1,16 @@
 # FastAPI backend app
 from contextlib import asynccontextmanager
-from typing import Annotated
 
-from fastapi import FastAPI, HTTPException, status, Depends
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
+from scalar_fastapi import get_scalar_api_reference
 
-import models
 from database import Base, engine, get_db
-from schemas import(
-    InventoryItemCreate,
-    InventoryItemResponse,
-    InventoryItemUpdate
-)
 
 from routers import (
     products,
-    inventory
+    inventory,
+    users
 )
 
 @asynccontextmanager
@@ -40,9 +32,17 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(products.router, prefix="/api/products", tags=["products"])
 app.include_router(inventory.router, prefix="/api/inventory", tags=["inventory"])
 
 @app.get("/")
 def home():
     return { "message": "hello world" }
+
+@app.get("/scalar", include_in_schema=False)
+async def scalar_html():
+    return get_scalar_api_reference(
+        title="Solana Management System",
+        openapi_url=app.openapi_url,
+    )

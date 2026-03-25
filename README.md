@@ -24,3 +24,4 @@ A calendar to show previous, current, and future events such as pop-up market ev
 
 ## Developers
 - Louie Izen B. Torres | [n1zen](https://www.github.com/n1zen)
+- Evan | [Poufles](https://github.com/Poufles)
