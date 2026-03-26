@@ -9,7 +9,7 @@ from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text, Enu
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
-from schemas import Role
+from schemas import Role, OrderStatus
 
 # this is the table for Users
 class User(Base):
@@ -21,7 +21,7 @@ class User(Base):
     firstname: Mapped[str] = mapped_column(String(120), unique=False, nullable=False)
     email: Mapped[str]= mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
-    role: Mapped[str] = mapped_column(SAEnum(Role), default=Role.user)
+    role: Mapped[Role] = mapped_column(SAEnum(Role), default=Role.user)
 
     orders: Mapped["Order"] = relationship(back_populates="cashier")
 
@@ -66,7 +66,7 @@ class Order(Base):
         DateTime(timezone=True),
         default=lambda: datetime.now(UTC),
     )
-    order_status: Mapped[str] = mapped_column(Text, nullable=False)
+    order_status: Mapped[OrderStatus] = mapped_column(SAEnum(OrderStatus), nullable=False, default=OrderStatus.pending)
     cashier_id: Mapped[int] = mapped_column(
         ForeignKey("users.id"),
         nullable=False,
@@ -102,7 +102,7 @@ class OrderItem(Base):
     quantity: Mapped[int] = mapped_column(Integer, nullable=False)
     unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
     price_adjustment: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, default=Decimal("0"))
-    
+
     @property
     def total_price(self) -> Decimal:
         return (self.unit_price * self.quantity) + self.price_adjustment
