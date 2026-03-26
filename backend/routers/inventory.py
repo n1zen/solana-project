@@ -36,7 +36,7 @@ async def create_inventory_item(inventory_item: InventoryItemCreate, db: Annotat
 
 # get all inventoryitems
 @router.get("/", response_model=list[InventoryItemResponse])
-async def get_inventory(db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_all_inventory(db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
         select(models.InventoryItem).options(selectinload(models.InventoryItem.product))
     )
