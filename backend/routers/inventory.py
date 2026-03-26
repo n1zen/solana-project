@@ -16,6 +16,8 @@ from schemas import (
 
 router = APIRouter()
 
+
+
 # create inventory item
 @router.post("/",
         response_model=InventoryItemResponse,

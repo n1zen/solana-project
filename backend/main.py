@@ -5,12 +5,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from scalar_fastapi import get_scalar_api_reference
 
-from database import Base, engine, get_db
+from database import Base, engine
 
 from routers import (
     products,
     inventory,
-    users
+    users,
+    dev_routes
 )
 
 @asynccontextmanager
@@ -32,13 +33,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(dev_routes.router, prefix="/api/dev_routes", tags=["dev_routes"])
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(products.router, prefix="/api/products", tags=["products"])
 app.include_router(inventory.router, prefix="/api/inventory", tags=["inventory"])
-
-@app.get("/")
-def home():
-    return { "message": "hello world" }
 
 @app.get("/scalar", include_in_schema=False)
 async def scalar_html():

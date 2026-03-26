@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 import models
 from auth import (
@@ -79,6 +78,18 @@ async def login_for_access_token(
 @router.get("/me", response_model=UserPrivate)
 async def get_current_user(current_user: CurrentUser):
     return current_user
+
+# get all users
+@router.get("", response_model=list[UserPublic])
+async def get_all_users(db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(select(models.User))
+    users = result.scalars().all()
+    if not users == []:
+        return users
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="No users exist"
+    )
 
 # get user
 @router.get("/{user_id}", response_model=UserPublic)
