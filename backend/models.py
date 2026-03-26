@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from decimal import Decimal
 
-from sqlalchemy import DateTime, ForeignKey, Integer, String, Text, Enum as SAEnum
+from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String, Text, Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
@@ -21,6 +22,8 @@ class User(Base):
     email: Mapped[str]= mapped_column(String(120), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
     role: Mapped[str] = mapped_column(SAEnum(Role), default=Role.user)
+
+    orders: Mapped["Order"] = relationship(back_populates="cashier")
 
 # this is the table for Products
 class Product(Base):
@@ -54,12 +57,54 @@ class InventoryItem(Base):
 
     product: Mapped[Product] = relationship(back_populates="inventory")
 
-# class Order(Base):
-#     __tablename__ = "orders"
+class Order(Base):
+    __tablename__ = "orders"
 
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    order_number: Mapped[int] = mapped_column(Integer, unique=True, nullable=False)
+    order_date: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+    )
+    order_status: Mapped[str] = mapped_column(Text, nullable=False)
+    cashier_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id"),
+        nullable=False,
+        index=True,
+    )
+    customer_name: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+    payment_method: Mapped[str] = mapped_column(Text, nullable=False)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
+    )
 
-# class OrderDetail(Base):
-#     __tablename__ = "orderdetails"
+    cashier: Mapped[User] = relationship(back_populates="orders")
+    order_items: Mapped[list["OrderItem"]] = relationship(back_populates="order")
 
-#     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+
+class OrderItem(Base):
+    __tablename__ = "orderitems"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    order_id: Mapped[int] = mapped_column(
+        ForeignKey("orders.id"),
+        nullable=False,
+        index=True
+    )
+    inventory_item_id: Mapped[int] = mapped_column(
+        ForeignKey("inventory.id"),
+        nullable=False,
+        index=True
+    )
+    notes: Mapped[str | None] = mapped_column(Text, nullable=True, default=None)
+    quantity: Mapped[int] = mapped_column(Integer, nullable=False)
+    unit_price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
+    price_adjustment: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False, default=Decimal("0"))
+    
+    @property
+    def total_price(self) -> Decimal:
+        return (self.unit_price * self.quantity) + self.price_adjustment
+
+    order: Mapped["Order"] = relationship(back_populates="order_items")
