@@ -32,24 +32,28 @@
                     class="form-input"
                     hint="SKU ID*"
                     :input-i-d="1"
+                    :input-v="inputSKUID"
                     @pass-value="getInputFromChild"
                     />
                     <BasicTextInput 
                     class="form-input"
                     hint="Product Name*"
                     :input-i-d="2"
+                    :input-v="inputProductName"
                     @pass-value="getInputFromChild"
                     />
                     <BasicTextInput 
                     class="form-input"
                     hint="Category*"
                     :input-i-d="3"
+                    :input-v="inputCategory"
                     @pass-value="getInputFromChild"
                     />
                     <BasicTextInput 
                     class="form-input"
                     hint="Price*"
                     :input-i-d="4"
+                    :input-v="inputPrice"
                     @pass-value="getInputFromChild"
                 />
                 <div id="actions">
@@ -58,7 +62,7 @@
                         txt-color="var(--color-secondary)"
                     />
                     <PrimaryButton
-                        text="Add Item"
+                        :text="isEdit ? 'Edit Item' : 'Add Item'"
                         :has-icon=true
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
@@ -87,44 +91,30 @@ import BasicTextInput from '../Inputs/BasicTextInput.vue';
 import SimpleProgressBar from '../ProgressBars/SimpleProgressBar.vue';
 
 import addProduct from '@/modules/product/addProduct';
-import getAllProducts from '@/modules/product/getAllProducts';
+import updateProduct from '@/modules/product/updateProduct';
 
 const emits = defineEmits([
     'onCancel',
     'onSubmit'
 ]);
 
-// Cancels the modal
-function handleOnCancel() {
-    emits('onCancel');
-};
-
-function handleOnSumbit() {
-    const { error, onSubmit } = addProduct({
-        sku: inputSKUID.value,
-        name: inputProductName.value,
-        category: inputCategory.value,
-        price: inputPrice.value
-    });
-
-    onSubmit();
-
-    if (error !== null) {
-        emits('onSubmit');
-    };
-
-    const { product, err, load } = getAllProducts();
-    load();
-
-    console.log(product)
-};
+const props = defineProps({
+    productItem: {
+        type: Object,
+        default: {}
+    },
+    isEdit: {
+        type: Boolean,
+        default: false
+    }
+});
 
 const btnCancelColor = ref('#505050b0')
 const btnAddIconColor = ref("#FFFAFA");
-const inputSKUID = ref('');
-const inputProductName = ref('');
-const inputCategory = ref('');
-const inputPrice = ref('');
+const inputSKUID = ref(props.productItem.sku);
+const inputProductName = ref(props.productItem.name);
+const inputCategory = ref(props.productItem.category);
+const inputPrice = ref(props.productItem.price);
 const progressValues = ref([]);
 
 function catchInitProgressValues(obj) {
@@ -139,7 +129,6 @@ function getInputFromChild(obj) {
     if (obj.inputID === 1) { 
         inputSKUID.value = obj.value;
         progressValues.value[0].status = obj.value !== '' ? true : false;
-        
     } else if (obj.inputID === 2) {
         inputProductName.value = obj.value;
         progressValues.value[1].status = obj.value !== '' ? true : false;
@@ -149,6 +138,47 @@ function getInputFromChild(obj) {
     } else { 
         inputPrice.value = obj.value;
         progressValues.value[3].status = obj.value !== '' ? true : false;
+    };
+};
+
+// Cancels the modal
+function handleOnCancel() {
+    emits('onCancel');
+};
+
+function handleOnSumbit() {
+    console.log(props.productItem);
+    if (!props.isEdit) {
+        const newItem = {
+            sku: inputSKUID.value,
+            name: inputProductName.value,
+            category: inputCategory.value,
+            price: inputPrice.value
+        };
+    
+        const { error, onSubmit } = addProduct(newItem);
+    
+        onSubmit();
+    
+        if (error !== null) {
+            emits('onSubmit', false, newItem); // Linked to parent 
+        };
+    } else {
+        const updatedItem = {
+            id: props.productItem.id,
+            sku: inputSKUID.value,
+            name: inputProductName.value,
+            category: inputCategory.value,
+            price: inputPrice.value
+        };
+
+        const { error, onSubmit } = updateProduct(updatedItem);
+
+        onSubmit();
+
+        if (error !== null) {
+            emits('onSubmit', true, updatedItem);
+        };
     };
 };
 </script>

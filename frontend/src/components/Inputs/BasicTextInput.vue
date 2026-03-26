@@ -2,7 +2,7 @@
     <div class="basic-text-input">
         <div class="container" :class="inputState">
             <p class="hint" v-if="hasHint">{{ hint }}</p>
-            <input type="text" name="" placeholder=" " v-model="inputValue" @blur="passInputValue">
+            <input type="text" name="" placeholder=" " v-model="inputValue" @input="passInputValue">
         </div>
         <p class="danger" v-if="inputState === 'invalid'">{{ dangerTxt }}</p>
     </div>
@@ -27,6 +27,9 @@ const props = defineProps({
     inputState: {
         type: String,
         default: 'default'
+    },
+    inputV: {
+        type: [ String, Number ]
     }
 });
 
@@ -35,9 +38,10 @@ const emits = defineEmits([
 ]);
 
 const hasHint = ref(props.hint !== '');
-const inputValue = ref('')
+const inputValue = ref(props.inputV);
 
 function passInputValue(){
+    console.log(inputValue.value)
     emits('passValue', {
         inputID: props.inputID,
         value: inputValue.value

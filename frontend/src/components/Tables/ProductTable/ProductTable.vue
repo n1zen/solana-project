@@ -28,6 +28,7 @@
                     :index="id"
                     :clickStatusFromParent="activeProductIndex === id" 
                     @isClicked="changeClickedProductInfo" 
+                    @onEditClick="handleEditRequestFromChild"
                 />
             </tbody>
         </table>
@@ -35,29 +36,30 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue';
-
-import getAllProducts from '@/modules/product/getAllProducts';
+import { ref } from 'vue';
 
 import ProductInfoRow from './ProductInfoRow.vue';
 
-const activeProductIndex = ref(null);
-const { products, error, load } = getAllProducts();
-const productList = ref([])
+const props = defineProps({
+    productList: {
+        type: Array,
+        default: []
+    }
+});
 
-// Get products
-onMounted(async () => {
-    await load();
-    
-    if (error.value === null) {
-        console.log(products.value);
-        productList.value = products.value;
-    };
-})
+const emits = defineEmits([
+    'editItemRequest'
+]);
+
+const activeProductIndex = ref(null);
 
 function changeClickedProductInfo(indexFromChild) {
     activeProductIndex.value = indexFromChild;
 }
+
+function handleEditRequestFromChild(itemID) {
+    emits('editItemRequest', true, itemID);
+};
 </script>
 
 <style scoped>

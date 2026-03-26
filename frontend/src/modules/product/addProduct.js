@@ -5,17 +5,11 @@ const addProduct = (newItem) => {
     const error = ref(null);
 
     const onSubmit = async () => {
-        console.log(newItem);
         try {
             const response = await fetch(`http://localhost:8000/api/products`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sku: newItem.sku,
-                    name: newItem.name,
-                    category: newItem.category,
-                    price: newItem.price
-                })
+                body: JSON.stringify(newItem)
             });
 
             if (!response.ok) {

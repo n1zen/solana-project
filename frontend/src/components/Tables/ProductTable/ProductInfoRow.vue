@@ -20,15 +20,17 @@
                     size="20"
                     :color="editOnHover ? 'var(--color-primary)' : 'var(--color-accent)'"
                     @mouseenter="handleMouseEnterOnEdit"    
-                    @mouseleave="handleMouseLeaveOnEdit"    
-                />
-                <SquarePen
+                    @mouseleave="handleMouseLeaveOnEdit"  
+                    @click.stop="handleEditClick"  
+                    />
+                    <SquarePen
                     v-else
                     size="20"
                     :color="editOnHover ? 'var(--color-accent)' : 'var(--color-primary)'"
                     :style="{ color: clickStatusFromParent ? 'var(--color-primary)' : '' }"
                     @mouseenter="handleMouseEnterOnEdit"    
                     @mouseleave="handleMouseLeaveOnEdit"    
+                    @click.stop="handleEditClick"  
                 />
             </button>
             <button class="delete">
@@ -72,12 +74,17 @@ const props = defineProps({
 const editOnHover = ref(false);
 const deleteOnHover = ref(false);
 
-const emit = defineEmits(['isClicked'])
+const emits = defineEmits([
+    'isClicked',
+    'onEditClick'
+])
 
 function handleClick() {
-    console.log('Clicked !');
+    emits('isClicked', props.index);
+};
 
-    emit('isClicked', props.index);
+function handleEditClick() {
+    emits('onEditClick', props.productInfo.id);
 };
 
 function handleMouseEnterOnEdit() {

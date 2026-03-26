@@ -8,6 +8,9 @@
                 <template #sSurface>
                     <ProductCRUDModal 
                         @on-cancel="renderModal"
+                        @on-submit="handleSubmit"
+                        :is-edit="editItemState"
+                        :product-item="productItemInfo"
                     />
                 </template>
             </Overlay>
@@ -31,7 +34,10 @@
                     </PrimaryButton>
                 </div>
             </section>
-            <ProductTable />
+            <ProductTable 
+                :product-list="productList"
+                @edit-item-request="renderModal"    
+            />
         </div>
     </div>
 </template>
@@ -39,7 +45,9 @@
 <script setup>
 import { Plus } from 'lucide-vue-next';
 
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
+
+import getAllProducts from '@/modules/product/getAllProducts';
 
 import ProductTable from '@/components/Tables/ProductTable/ProductTable.vue';
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
@@ -48,14 +56,49 @@ import Overlay from '@/components/Modals/Overlay.vue';
 
 const btnAddIconColor = ref("#FFFAFA");
 const isModalOpen = ref(false);
+const productList = ref([]);
+const productItemInfo = ref({});
+const editItemState = ref(false);
+
+const { products, error, load } = getAllProducts();
+
+// Get products from the server
+onMounted(async () => {
+    await load();
+
+    if (error.value === null) {
+        productList.value = products.value;
+    };
+});
 
 function changeButtonAddIconColor() {
     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
 };
 
 // Renders the modal
-function renderModal() {
+function renderModal(isEdit, itemID) {
+    editItemState.value = false;
     isModalOpen.value = !isModalOpen.value;
+
+    if (isEdit) {
+        editItemState.value = true;
+        productItemInfo.value = productList.value[itemID - 1]
+        console.log(productItemInfo.value);
+    };
+};
+
+function handleSubmit(isEdit, newItem) {
+    if (!isEdit) {
+        newItem.id = productList.value.length + 1
+        productList.value.push(newItem);
+    } else {
+        productList.value[newItem.id - 1].sku = newItem.sku;
+        productList.value[newItem.id - 1].name = newItem.name;
+        productList.value[newItem.id - 1].category = newItem.category;
+        productList.value[newItem.id - 1].price = newItem.price;
+    };
+
+    renderModal(); // change this later
 };
 </script>
 
