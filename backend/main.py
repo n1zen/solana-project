@@ -11,6 +11,7 @@ from routers import (
     products,
     inventory,
     users,
+    orders,
     dev_routes
 )
 
@@ -37,6 +38,7 @@ app.include_router(dev_routes.router, prefix="/api/dev_routes", tags=["dev_route
 app.include_router(users.router, prefix="/api/users", tags=["users"])
 app.include_router(products.router, prefix="/api/products", tags=["products"])
 app.include_router(inventory.router, prefix="/api/inventory", tags=["inventory"])
+app.include_router(orders.router, prefix="/api/orders", tags=["orders"])
 
 @app.get("/scalar", include_in_schema=False)
 async def scalar_html():

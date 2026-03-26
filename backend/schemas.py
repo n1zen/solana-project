@@ -89,9 +89,8 @@ class InventoryItemUpdate(BaseModel):
 class OrderItemBase(BaseModel):
     inventory_item_id: int
     quantity: int
-    unit_price: Decimal
     price_adjustment: Decimal = Decimal("0")
-    notes: str | None = Field(default=None, min_length=1)
+    notes: str | None = Field(default=None)
 
 class OrderItemCreate(OrderItemBase):
     pass

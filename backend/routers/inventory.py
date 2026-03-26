@@ -38,7 +38,8 @@ async def create_inventory_item(inventory_item: InventoryItemCreate, db: Annotat
 @router.get("/", response_model=list[InventoryItemResponse])
 async def get_all_inventory(db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
-        select(models.InventoryItem).options(selectinload(models.InventoryItem.product))
+        select(models.InventoryItem)
+            .options(selectinload(models.InventoryItem.product))
     )
     inventory = result.scalars().all()
     return inventory
@@ -47,8 +48,9 @@ async def get_all_inventory(db: Annotated[AsyncSession, Depends(get_db)]):
 @router.get("/{inventory_id}", response_model=InventoryItemResponse)
 async def get_inventory_item(inventory_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
     result = await db.execute(
-        select(models.InventoryItem).options(selectinload(models.InventoryItem.product))
-        .where(models.InventoryItem.id == inventory_id)
+        select(models.InventoryItem)
+            .options(selectinload(models.InventoryItem.product))
+            .where(models.InventoryItem.id == inventory_id)
     )
     item = result.scalars().first()
     if item:

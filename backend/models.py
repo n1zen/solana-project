@@ -56,6 +56,7 @@ class InventoryItem(Base):
     )
 
     product: Mapped[Product] = relationship(back_populates="inventory")
+    order_item: Mapped["OrderItem"] = relationship(back_populates="inventory_item")
 
 class Order(Base):
     __tablename__ = "orders"
@@ -108,3 +109,4 @@ class OrderItem(Base):
         return (self.unit_price * self.quantity) + self.price_adjustment
 
     order: Mapped["Order"] = relationship(back_populates="order_items")
+    inventory_item: Mapped["InventoryItem"] = relationship(back_populates="order_item")
