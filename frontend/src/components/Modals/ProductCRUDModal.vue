@@ -20,17 +20,22 @@
             </header>
             <section id="progress">
                 <SimpleProgressBar 
-                    :count="4"
-                    :progress-bars="progressValues"
                     default-color="var(--color-secondary)"
                     done-color="var(--color-valid)"
-                    @pass-init-values="catchInitProgressValues"
+                    :inputs-value="[
+                        inputSKUID,
+                        inputProductName,
+                        inputCategory,
+                        inputPrice
+                    ]"
                 />
             </section>
             <form action="" method="post" @submit.prevent="">
                 <BasicTextInput
                     class="form-input"
                     hint="SKU ID*"
+                    danger-txt="This SKU ID already exists!"
+                    :input-state="stateInputSKUID"
                     :input-i-d="1"
                     :input-v="inputSKUID"
                     @pass-value="getInputFromChild"
@@ -38,6 +43,8 @@
                     <BasicTextInput 
                     class="form-input"
                     hint="Product Name*"
+                    danger-txt="This product name already exists!"
+                    :input-state="stateInputProductName"
                     :input-i-d="2"
                     :input-v="inputProductName"
                     @pass-value="getInputFromChild"
@@ -45,6 +52,7 @@
                     <BasicTextInput 
                     class="form-input"
                     hint="Category*"
+                    :input-state="stateInputCategory"
                     :input-i-d="3"
                     :input-v="inputCategory"
                     @pass-value="getInputFromChild"
@@ -52,29 +60,43 @@
                     <BasicTextInput 
                     class="form-input"
                     hint="Price*"
+                    :input-state="stateInputPrice"
                     :input-i-d="4"
                     :input-v="inputPrice"
                     @pass-value="getInputFromChild"
                 />
-                <div id="actions">
-                    <NudeButton 
-                        text="Reset"
-                        txt-color="var(--color-secondary)"
-                    />
-                    <PrimaryButton
-                        :text="isEdit ? 'Edit Item' : 'Add Item'"
-                        :has-icon=true
-                        @on-hover="changeButtonAddIconColor"
-                        @on-leave="changeButtonAddIconColor"
-                        @on-click="handleOnSumbit"
-                    >
-                        <template #sIcon>
-                             <Plus 
-                                size="16"
-                                :color="btnAddIconColor"
-                             />
-                        </template>
-                    </PrimaryButton>
+                <div id="bottom">
+                    <p 
+                        v-if="hasMissingInput"
+                        id="danger-message">
+                        Please complete the form!
+                    </p>
+                    <div id="actions">
+                        <NudeButton 
+                            text="Reset"
+                            txt-color="var(--color-secondary)"
+                        />
+                        <PrimaryButton
+                            :text="isEdit ? 'Edit Item' : 'Add Item'"
+                            :has-icon=true
+                            @on-hover="changeButtonAddIconColor"
+                            @on-leave="changeButtonAddIconColor"
+                            @on-click="handleOnSubmit"
+                        >
+                            <template #sIcon>
+                                <Plus 
+                                    v-if="!isEdit"
+                                    size="16"
+                                    :color="btnAddIconColor"
+                                />
+                                <SquarePen 
+                                    v-else
+                                    size="16"
+                                    :color="btnAddIconColor"
+                                 />
+                            </template>
+                        </PrimaryButton>
+                    </div>
                 </div>
             </form>
         </div>
@@ -83,7 +105,7 @@
 
 <script setup>
 import { ref } from 'vue';
-import { ArrowLeft, Plus } from 'lucide-vue-next';
+import { ArrowLeft, Plus, SquarePen } from 'lucide-vue-next';
 
 import PrimaryButton from '../Buttons/PrimaryButton.vue';
 import NudeButton from '../Buttons/NudeButton.vue';
@@ -111,74 +133,150 @@ const props = defineProps({
 
 const btnCancelColor = ref('#505050b0')
 const btnAddIconColor = ref("#FFFAFA");
+
 const inputSKUID = ref(props.productItem.sku);
 const inputProductName = ref(props.productItem.name);
 const inputCategory = ref(props.productItem.category);
 const inputPrice = ref(props.productItem.price);
-const progressValues = ref([]);
 
-function catchInitProgressValues(obj) {
-    progressValues.value = obj;
-};
+const stateInputSKUID = ref(
+    props.productItem.sku === '' ||
+    props.productItem.sku === undefined ?
+    'default' : 'valid'
+);
+const stateInputProductName = ref(
+    props.productItem.name === '' ||
+    props.productItem.name === undefined ?
+    'default' : 'valid'
+);
+const stateInputCategory = ref(
+    props.productItem.category === '' ||
+    props.productItem.category === undefined ?
+    'default' : 'valid'
+);
+const stateInputPrice = ref(
+    props.productItem.price === '' ||
+    props.productItem.price === undefined ?
+    'default' : 'valid'
+);
+
+const hasMissingInput = ref(false);
 
 function changeButtonAddIconColor() {
     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
 };
 
-function getInputFromChild(obj) {
-    if (obj.inputID === 1) { 
-        inputSKUID.value = obj.value;
-        progressValues.value[0].status = obj.value !== '' ? true : false;
-    } else if (obj.inputID === 2) {
-        inputProductName.value = obj.value;
-        progressValues.value[1].status = obj.value !== '' ? true : false;
-    } else if (obj.inputID === 3) {
-        inputCategory.value = obj.value;
-        progressValues.value[2].status = obj.value !== '' ? true : false;
-    } else { 
-        inputPrice.value = obj.value;
-        progressValues.value[3].status = obj.value !== '' ? true : false;
+function getInputFromChild({ inputID, value }) {
+    hasMissingInput.value = false;
+
+    const inputsMap = {
+        1: inputSKUID,
+        2: inputProductName,
+        3: inputCategory,
+        4: inputPrice
     };
+
+    const statesMap = {
+        1: stateInputSKUID,
+        2: stateInputProductName,
+        3: stateInputCategory,
+        4: stateInputPrice
+    };
+
+    const targetInput = inputsMap[inputID];
+    const targetState = statesMap[inputID];
+
+    if (!targetInput || !targetState) return;
+
+    targetInput.value = value;
+    targetState.value = value !== '' ? 'valid' : 'default';
 };
 
-// Cancels the modal
 function handleOnCancel() {
     emits('onCancel');
 };
 
-function handleOnSumbit() {
-    console.log(props.productItem);
-    if (!props.isEdit) {
-        const newItem = {
-            sku: inputSKUID.value,
-            name: inputProductName.value,
-            category: inputCategory.value,
-            price: inputPrice.value
+async function handleOnSubmit() {
+    if (handleMissingInput()) {
+        hasMissingInput.value = true;
+        return;
+    }
+
+    const isEditMode = props.isEdit;
+
+    const item = {
+        sku: inputSKUID.value,
+        name: inputProductName.value,
+        category: inputCategory.value,
+        price: inputPrice.value,
+        ...(isEditMode && { id: props.productItem.id })
+    };
+
+    if (isEditMode) {
+        const noChanges =
+            item.sku === props.productItem.sku &&
+            item.name === props.productItem.name &&
+            item.category === props.productItem.category &&
+            item.price === props.productItem.price;
+
+        if (noChanges) {
+            emits('onSubmit', {
+                responseType: 'noUpdate',
+                item
+            });
+            return;
         };
-    
-        const { error, onSubmit } = addProduct(newItem);
-    
-        onSubmit();
-    
-        if (error !== null) {
-            emits('onSubmit', false, newItem); // Linked to parent 
-        };
+    };
+
+    const action = isEditMode ? updateProduct : addProduct;
+    const { error, onSubmit } = action(item);
+
+    await onSubmit();
+
+    if (error.value === null) {
+        emits('onSubmit', {
+            responseType: isEditMode ? 'updated' : 'add',
+            item
+        });
     } else {
-        const updatedItem = {
-            id: props.productItem.id,
-            sku: inputSKUID.value,
-            name: inputProductName.value,
-            category: inputCategory.value,
-            price: inputPrice.value
+        handleExistingInput(error);
+    };
+};
+
+function handleMissingInput() {
+    let hasMissingInput = false;
+
+    const inputs = [
+        inputSKUID.value,
+        inputProductName.value,
+        inputCategory.value,
+        inputPrice.value
+    ];
+
+    const inputStates = [
+        stateInputSKUID,
+        stateInputProductName,
+        stateInputCategory,
+        stateInputPrice
+    ];
+
+    for (let iter = 0; iter < inputs.length; iter++) {
+        if (inputs[iter] === '' || inputs[iter] === undefined ) {
+            inputStates[iter].value = 'missing';
+            hasMissingInput = true;
         };
+    };
 
-        const { error, onSubmit } = updateProduct(updatedItem);
+    return hasMissingInput;
+};
 
-        onSubmit();
-
-        if (error !== null) {
-            emits('onSubmit', true, updatedItem);
-        };
+function handleExistingInput(error) {
+    if (error.value === 'Product SKU already exists.') {
+        stateInputSKUID.value = 'invalid';
+    };
+    
+    if (error.value === 'Product NAME already exists.') {
+        stateInputProductName.value = 'invalid';
     };
 };
 </script>
@@ -191,6 +289,8 @@ function handleOnSumbit() {
     width: 435px;
     min-height: 300px;
     padding: 30px 20px;
+
+    transition: 0.3s;
 }
 
 #title {
@@ -214,7 +314,22 @@ header {
     margin-bottom: 20px;
 }
 
+#bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+#danger-message {
+    padding-left: 10px;
+    color: var(--color-secondary);
+    font-size: 14px;
+    font-weight: bold;
+}
+
 #actions {
+    flex-grow: 1;
+
     display: flex;
     gap: 30px;
     align-items: center;

@@ -1,10 +1,19 @@
 <template>
     <div class="basic-text-input">
         <div class="container" :class="inputState">
-            <p class="hint" v-if="hasHint">{{ hint }}</p>
-            <input type="text" name="" placeholder=" " v-model="inputValue" @input="passInputValue">
+            <p 
+                v-if="hasHint" 
+                class="hint" 
+                @click="handleClickOnHint">{{ hint }}</p>
+            <input 
+                type="text" 
+                name="" 
+                placeholder=" " 
+                v-model="inputValue" 
+                ref="inputRef"
+                @input="passInputValue">
         </div>
-        <p class="danger" v-if="inputState === 'invalid'">{{ dangerTxt }}</p>
+        <p id="state" class="danger" v-if="inputState === 'invalid'">{{ dangerTxt }}</p>
     </div>
 </template>
 
@@ -39,13 +48,17 @@ const emits = defineEmits([
 
 const hasHint = ref(props.hint !== '');
 const inputValue = ref(props.inputV);
+const inputRef = ref(null);
 
 function passInputValue(){
-    console.log(inputValue.value)
     emits('passValue', {
         inputID: props.inputID,
         value: inputValue.value
     });
+};
+
+function handleClickOnHint() {
+    inputRef.value?.focus();
 };
 </script>
 
@@ -57,6 +70,7 @@ function passInputValue(){
 .container {
     border: 2px solid var(--color-accent);
     border-radius: 5px;
+    cursor: text;
     font-weight: bold;
     padding: 7px;
     position: relative;
@@ -94,6 +108,11 @@ input {
     color: var(--color-secondary);
     font-size: 12px;
     padding-left: 7px;
+}
+
+#state {
+    font-weight: bold;
+    margin-top: 5px;
 }
 
 input::placeholder {

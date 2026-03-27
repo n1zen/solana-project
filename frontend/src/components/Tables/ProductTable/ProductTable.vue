@@ -29,6 +29,7 @@
                     :clickStatusFromParent="activeProductIndex === id" 
                     @isClicked="changeClickedProductInfo" 
                     @onEditClick="handleEditRequestFromChild"
+                    @onDeleteClick="handleDeleteRequestFromChild"
                 />
             </tbody>
         </table>
@@ -48,7 +49,8 @@ const props = defineProps({
 });
 
 const emits = defineEmits([
-    'editItemRequest'
+    'editItemRequest',
+    'deleteItemRequest'
 ]);
 
 const activeProductIndex = ref(null);
@@ -58,7 +60,18 @@ function changeClickedProductInfo(indexFromChild) {
 }
 
 function handleEditRequestFromChild(itemID) {
-    emits('editItemRequest', true, itemID);
+    // emits('editItemRequest', true, itemID);
+    emits('editItemRequest', {
+        type: 'update',
+        itemID
+    });
+};
+
+function handleDeleteRequestFromChild(itemID) {
+    emits('deleteItemRequest', {
+        type: 'delete',
+        itemID
+    });
 };
 </script>
 

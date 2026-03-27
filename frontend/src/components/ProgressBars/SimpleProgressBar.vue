@@ -2,19 +2,24 @@
     <div class="simple-progress-bar">
         <div 
             class="progress" 
-            :style="{ backgroundColor: progressBars[id - 1].status ? doneColor : defaultColor }"
-            v-for="id in count" :key="id" :id="'progress-bar-'+id"
+            :style="{ 
+                backgroundColor: 
+                inputsValue[index] === '' ||
+                inputsValue[index] === undefined ? 
+                defaultColor : doneColor 
+            }"
+            v-for="(item, index) in inputsValue" 
+            :key="index" 
+            :id="'progress-bar-'+index"
         ></div>
     </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-
 const props = defineProps({
-    count: {
-        type: Number,
-        default: 1
+    inputsValue: {
+        type: Array,
+        default: []
     },
     defaultColor: {
         type: String,
@@ -24,32 +29,7 @@ const props = defineProps({
         type: String,
         default: 'green'
     },
-    progressBars: {
-        type: Array,
-        default: []
-    }
 });
-
-for (let iter = 0; iter < props.count; iter++) {
-    let newObj = {
-        barNo: iter + 1,
-        status: false,
-    }
-    
-    props.progressBars.push(newObj)
-}
-
-const emits = defineEmits([
-    'passInitValues'
-])
-
-onMounted(() => {
-    emits('passInitValues', props.progressBars);
-});
-
-function updateProgressBar() {
-    // if ()
-}
 </script>
 
 <style scoped>

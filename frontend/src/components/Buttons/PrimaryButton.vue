@@ -58,7 +58,6 @@ const emits = defineEmits([
 const isHovered = ref(false);
 
 function handleClick() {
-    console.log(`PrimaryButton clicked: ${props.text}`);
     emits('onClick');
 }
 

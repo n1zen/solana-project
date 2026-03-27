@@ -5,10 +5,19 @@
         <!-- <NavButton /> -->
         <!-- <PrimaryButton /> -->
         <!-- <ProductTable /> -->
-        <!-- <div>Tite ko</div> -->
         <Overlay>
             <template #sSurface>
-                <ProductCRUDModal />
+                <!-- <ProductCRUDModal /> -->
+                <DeleteModal 
+                    textTitle="product"
+                    desc="This action will permanently delete this product."
+                    :items="[
+                        { type: 'SKU ID', data: '250001' },
+                        { type: 'Product Name', data: 'Cat in Box' },
+                        { type: 'Categori', data: 'Animal' },
+                        { type: 'Price', data: '$15' }
+                    ]"
+                />
             </template>
         </Overlay>
         <!-- <BasicTextInput 
@@ -25,6 +34,7 @@ import ProductTable from '@/components/Tables/ProductTable/ProductTable.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
 import ProductCRUDModal from '@/components/Modals/ProductCRUDModal.vue';
 import BasicTextInput from '@/components/Inputs/BasicTextInput.vue';
+import DeleteModal from '@/components/Modals/DeleteModal.vue';
 </script>
 
 <style scoped>
