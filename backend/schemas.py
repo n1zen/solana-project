@@ -111,7 +111,8 @@ class OrderItemUpdate(BaseModel):
 class OrderBase(BaseModel):
     order_number: int
     payment_method: str = Field(min_length=1, max_length=100)
-    customer_name: str | None = Field(default=None, min_length=1, max_length=100)
+    customer_name: str | None = Field(default=None, max_length=100)
+    order_status: OrderStatus = Field(default=OrderStatus.pending)
 
 class OrderCreate(OrderBase):
     cashier_id: int

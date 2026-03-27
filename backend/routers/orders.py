@@ -12,6 +12,33 @@ from schemas import OrderItemCreate, OrderItemResponse, OrderItemUpdate, OrderCr
 
 router = APIRouter()
 
+# validate if cashier/user exists
+async def cashier_exists(cashier_id: int, db):
+    result = await db.execute(
+        select(models.User)
+        .where(models.User.id == cashier_id)
+    )
+    user = result.scalars().first()
+    if user:
+        return user
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="This cashier does not exist"
+    )
+
+# validate if order number already exists
+async def order_number_exists(order_number: int, db):
+    result = await db.execute(
+        select(models.Order)
+        .where(models.Order.order_number == order_number)
+    )
+    existing_order = result.scalars().all()
+    if existing_order:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="This order number already exists"
+        )
+
 # create order with items
 @router.post("/",
     response_model=OrderResponse,
@@ -20,54 +47,40 @@ router = APIRouter()
 async def create_order(order: OrderCreate, db: Annotated[AsyncSession, Depends(get_db)]):
 
     # validate if cashier/user exists
-    result = await db.execute(
-        select(models.User)
-        .where(models.User.id == order.cashier_id)
-    )
-    user = result.scalars().first()
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="This cashier does not exist"
-        )
+    await cashier_exists(order.cashier_id, db)
     
     # validate if order number already exists
-    result = await db.execute(
-        select(models.Order)
-        .where(models.Order.order_number == order.order_number)
-    )
-    existing_order = result.scalars().first()
-    if existing_order:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Order number already exists"
-        )
+    await order_number_exists(order.order_number, db)
     
     new_order_items: list[models.OrderItem] = []
     
+    # get all inventory items with their products in order_items
+    item_ids = [order_item.inventory_item_id for order_item in order.order_items]
+    result = await db.execute(
+        select(models.InventoryItem)
+            .options(selectinload(models.InventoryItem.product))
+            .where(models.InventoryItem.id.in_(item_ids))
+    )
+    inventory_map = {item.id: item for item in result.scalars().all()}
+
     # validate items in OrderItems
     for order_item in order.order_items:
-        # get the order_item in inventory if it exists
-        result = await db.execute(
-            select(models.InventoryItem)
-            .options(selectinload(models.InventoryItem.product))
-            .where(models.InventoryItem.id == order_item.inventory_item_id)
-        )
-        item = result.scalars().first()
-        # check if it exists
+        item = inventory_map.get(order_item.inventory_item_id)
+
         if not item:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="This item does not exist",
+                detail="This item does not exist"
             )
-        # check if there is enough items available
         if item.quantity < order_item.quantity:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="There is not enough stock available",
+                detail="There is not enough stock available"
             )
+        
         item.quantity -= order_item.quantity
         db.add(item)
+
         new_order_item = models.OrderItem(
             inventory_item_id = order_item.inventory_item_id,
             quantity = order_item.quantity,
@@ -76,14 +89,14 @@ async def create_order(order: OrderCreate, db: Annotated[AsyncSession, Depends(g
             notes = order_item.notes
         )
         new_order_items.append(new_order_item)
-    
+
     new_order = models.Order(
         order_number = order.order_number,
         payment_method = order.payment_method,
         customer_name = order.customer_name,
         cashier_id = order.cashier_id,
         order_items = new_order_items,
-        order_status = OrderStatus.pending
+        order_status = order.order_status
     )
     
     try:
