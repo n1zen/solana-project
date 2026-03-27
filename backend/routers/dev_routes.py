@@ -56,3 +56,22 @@ async def dev_purge_users(db: Annotated[AsyncSession, Depends(get_db)]):
     for user in users:
         await db.delete(user)
     await db.commit()
+
+# (dev only) delete all orders
+@router.delete(
+    '/purge/orders',
+    status_code=status.HTTP_204_NO_CONTENT
+)
+async def dev_purge_orders(db: Annotated[AsyncSession, Depends(get_db)]):
+    result = await db.execute(
+        select(models.Order)
+    )
+    orders = result.scalars().all()
+    if orders == []:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            details="No orders to delete"
+        )
+    for order in orders:
+        await db.delete(order)
+    await db.commit()
