@@ -2,12 +2,18 @@
 from typing import Annotated
 from datetime import datetime
 from enum import Enum
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 class Role(str, Enum):
     admin = "admin"
     user = "user"
+
+class OrderStatus(str, Enum):
+    pending = "pending"
+    completed = "completed"
+    voided = "voided"
 
 class UserBase(BaseModel):
     username: str = Field(min_length=1, max_length=120)
@@ -79,3 +85,50 @@ class InventoryItemUpdate(BaseModel):
     quantity: int | None = Field(default=None)
     details: Annotated[str | None, Field(min_length=1)] = None
     product_id: int | None = Field(default=None)
+
+class OrderItemBase(BaseModel):
+    inventory_item_id: int
+    quantity: int
+    price_adjustment: Decimal = Decimal("0")
+    notes: str | None = Field(default=None)
+
+class OrderItemCreate(OrderItemBase):
+    pass
+
+class OrderItemResponse(OrderItemBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    total_price: Decimal
+
+class OrderItemUpdate(BaseModel):
+    inventory_item_id: int | None = Field(default=None)
+    quantity: int | None = Field(default=None)
+    unit_price: Decimal | None = Field(default=None)
+    price_adjustment: Decimal | None = Field(default=None)
+    notes: Annotated[str | None, Field(min_length=1)] = None
+
+class OrderBase(BaseModel):
+    order_number: int
+    payment_method: str = Field(min_length=1, max_length=100)
+    customer_name: str | None = Field(default=None, max_length=100)
+    order_status: OrderStatus = Field(default=OrderStatus.pending)
+
+class OrderCreate(OrderBase):
+    cashier_id: int
+    order_items: list[OrderItemCreate]
+
+class OrderResponse(OrderBase):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    order_status: OrderStatus
+    order_date: datetime
+    updated_at: datetime
+    cashier: UserPublic
+    order_items: list[OrderItemResponse]
+
+class OrderUpdate(BaseModel):
+    order_status: OrderStatus | None = Field(default=None)
+    payment_method: str | None = Field(default=None, min_length=1, max_length=100)
+    customer_name: Annotated[str | None, Field(min_length=1, max_length=100)] = None

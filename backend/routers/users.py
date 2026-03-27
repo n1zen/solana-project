@@ -27,7 +27,11 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
 )
 async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_db)]):
+
+    # check if username already exists
     await user_exist("username", user.username, db)
+    
+    # check if email is already registered
     await user_exist("email", user.email, db)
 
     new_user = models.User(
@@ -36,6 +40,7 @@ async def create_user(user: UserCreate, db: Annotated[AsyncSession, Depends(get_
         firstname = user.firstname,
         lastname = user.lastname,
         password_hash = hash_password(user.password),
+        role = user.role
     )
     db.add(new_user)
     await db.commit()

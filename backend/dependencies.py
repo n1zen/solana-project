@@ -23,7 +23,7 @@ async def product_exist(item: str, content: str, db):
 
     if existing_item:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail=message
         )
     
@@ -46,6 +46,6 @@ async def user_exist(item: str, content: str, db):
     existing_user = result.scalars().first()
     if existing_user:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail=message
         )
