@@ -273,10 +273,12 @@ function handleMissingInput() {
 function handleExistingInput(error) {
     if (error.value === 'Product SKU already exists.') {
         stateInputSKUID.value = 'invalid';
+        inputSKUID.value = '';
     };
     
     if (error.value === 'Product NAME already exists.') {
         stateInputProductName.value = 'invalid';
+        inputProductName.value = '';
     };
 };
 </script>

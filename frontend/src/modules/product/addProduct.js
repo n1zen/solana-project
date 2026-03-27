@@ -20,11 +20,11 @@ const addProduct = (newItem) => {
                 throw Error(message);
             }
 
-            alert('Product added successfully');
+            // alert('Product added successfully');
         } catch (err) {
             error.value = err.message;
             console.log(error.value);
-            alert(error.value);
+            // alert(error.value);
             console.error(err.message);
         }
     }

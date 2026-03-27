@@ -21,8 +21,11 @@
                     </th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody
+                :class="[ productList.length === 0 ? 'empty' : '' ]"    
+            >
                 <ProductInfoRow 
+                    v-if="productList.length !== 0"
                     v-for="id in productList.length" 
                     :productInfo="productList[id - 1]" 
                     :index="id"
@@ -31,6 +34,17 @@
                     @onEditClick="handleEditRequestFromChild"
                     @onDeleteClick="handleDeleteRequestFromChild"
                 />
+                <div v-else id="empty-list">
+                    <div id="empty-icon">
+                        <PackageSearch 
+                            size="80"
+                        />
+                    </div>
+                    <p id="empty-text">
+                        There are no products available...
+                        <br>
+                    </p>
+                </div>
             </tbody>
         </table>
     </div>
@@ -40,6 +54,7 @@
 import { ref } from 'vue';
 
 import ProductInfoRow from './ProductInfoRow.vue';
+import { PackageSearch } from 'lucide-vue-next';
 
 const props = defineProps({
     productList: {
@@ -80,6 +95,10 @@ table {
     border-collapse: collapse;
     table-layout: fixed;
 }
+
+/* tbody.empty {
+    position: relative;
+} */
 
 th {
     border-bottom: 1px solid var(--color-accent);
@@ -122,5 +141,30 @@ tr {
 
 #legend-id span {
     margin-left: 10px;
+}
+
+/* 
+*   Position relative @ ProductsView.vue 
+*   #products
+*/
+#empty-list {
+    color: var(--color-secondary);
+    font-size: 18px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    justify-content: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#empty-icon {
+    border: 3px solid var(--color-secondary);
+    border-radius: 50%;
+    padding: 25px;
 }
 </style>

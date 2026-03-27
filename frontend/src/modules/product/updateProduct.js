@@ -5,7 +5,6 @@ const updateProduct = (updatedProduct) => {
     const error = ref(null);
 
     const onSubmit = async () => {
-        console.log(updatedProduct);
         try {
             const response = await fetch(`http://localhost:8000/api/products/${ updatedProduct.id }`, {
                 method: 'PATCH',
@@ -21,10 +20,10 @@ const updateProduct = (updatedProduct) => {
                 throw Error(message);
             }
 
-            alert('Product edited successfully');
+            // alert('Product edited successfully');
         } catch (err) {
             error.value = err.message;
-            alert(error.value);
+            // alert(error.value);
             console.error(err.message);
         }
     }

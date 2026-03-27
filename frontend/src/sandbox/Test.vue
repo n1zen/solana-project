@@ -8,7 +8,7 @@
         <Overlay>
             <template #sSurface>
                 <!-- <ProductCRUDModal /> -->
-                <DeleteModal 
+                <!-- <DeleteModal 
                     textTitle="product"
                     desc="This action will permanently delete this product."
                     :items="[
@@ -17,7 +17,15 @@
                         { type: 'Categori', data: 'Animal' },
                         { type: 'Price', data: '$15' }
                     ]"
-                />
+                /> -->
+                <MessageModal>
+                    <template #sMessageIcon>
+                        <PackageCheck 
+                        size="75"
+                        color="var(--color-valid)"
+                        />
+                    </template>
+                </MessageModal>
             </template>
         </Overlay>
         <!-- <BasicTextInput 
@@ -35,6 +43,8 @@ import Overlay from '@/components/Modals/Overlay.vue';
 import ProductCRUDModal from '@/components/Modals/ProductCRUDModal.vue';
 import BasicTextInput from '@/components/Inputs/BasicTextInput.vue';
 import DeleteModal from '@/components/Modals/DeleteModal.vue';
+import MessageModal from '@/components/Modals/MessageModal.vue';
+import { PackageCheck } from 'lucide-vue-next';
 </script>
 
 <style scoped>

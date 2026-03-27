@@ -18,10 +18,10 @@ const deleteProduct = (id) => {
                 throw Error(message);
             }
 
-            alert('Product deleted successfully');
+            // alert('Product deleted successfully');
         } catch (err) {
             error.value = err.message;
-            alert(error.value);
+            // alert(error.value);
             console.error(err.message);
         }
     }

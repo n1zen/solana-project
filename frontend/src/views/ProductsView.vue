@@ -5,22 +5,57 @@
                 v-if="isModalOpen"
                 @on-click="reinitalize"
             >
-                <template v-if="requestedModal === 'update' || requestedModal === 'add'" #sSurface>
-                    <ProductCRUDModal 
-                        @on-cancel="reinitalize"
-                        @on-submit="handleSubmit"
-                        :is-edit="requestedModal === 'update'"
-                        :product-item="productItemInfo"
+                <template #sSurface>
+                    <transition name="fade" mode="out-in">
+                        <ProductCRUDModal 
+                            v-if="requestedModal === 'update' || requestedModal === 'add'"
+                            key="crud"
+                            @on-cancel="reinitalize"
+                            @on-submit="handleSubmit"
+                            :is-edit="requestedModal === 'update'"
+                            :product-item="productItemInfo"
                         />
-                    </template>
-                    <template v-else-if="requestedModal === 'delete'" #sSurface>
                         <DeleteModal 
-                        textTitle="product"
-                        desc="This action will permanently delete this product."
-                        :items="itemToDelete"
-                        @on-cancel="reinitalize"
-                        @on-confirm="handleConfirmedDelete"
-                    />
+                            v-else-if="requestedModal === 'delete'"
+                            key="delete"
+                            textTitle="product"
+                            desc="This action will permanently delete this product."
+                            :items="itemToDelete"
+                            @on-cancel="reinitalize"
+                            @on-confirm="handleConfirmedDelete"
+                        />
+                        <MessageModal
+                            v-else
+                            key="message"
+                            :message="messageModalInfo.message"
+                            :message-text-color="messageModalInfo.messageTextColor"
+                            :icon-border-color="messageModalInfo.iconBorderColor"
+                            @on-confirm="reinitalize"
+                        >      
+                            <template #sMessageIcon>
+                                <PackagePlus 
+                                    v-if="messageModalInfo.iconType === 'add'"
+                                    size="60"
+                                    color="var(--color-valid)"
+                                />
+                                <PackageCheck 
+                                    v-else-if="messageModalInfo.iconType === 'update'"
+                                    size="60"
+                                    color="var(--color-valid)"
+                                />
+                                <PackageX 
+                                    v-else-if="messageModalInfo.iconType === 'delete'"
+                                    size="60"
+                                    color="var(--color-valid)"
+                                />
+                                <FilePen 
+                                    v-else
+                                    size="60"
+                                    color="var(--color-valid)"
+                                />
+                            </template>
+                        </MessageModal>
+                    </transition>
                 </template>
             </Overlay>
         </transition>
@@ -53,9 +88,9 @@
 </template>
 
 <script setup>
-import { Plus } from 'lucide-vue-next';
+import { FilePen, Plus, PackagePlus, PackageCheck, PackageX } from 'lucide-vue-next';
 
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
 import getAllProducts from '@/modules/product/getAllProducts';
 import deleteProduct from '@/modules/product/deleteProduct';
@@ -65,6 +100,7 @@ import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 import ProductCRUDModal from '@/components/Modals/ProductCRUDModal.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
 import DeleteModal from '@/components/Modals/DeleteModal.vue';
+import MessageModal from '@/components/Modals/MessageModal.vue';
 
 const btnAddIconColor = ref("#FFFAFA");
 const isModalOpen = ref(false);
@@ -72,6 +108,12 @@ const requestedModal = ref('');
 const productList = ref([]);
 const productItemInfo = ref({});
 const itemToDelete = ref([]);
+const messageModalInfo = reactive({ 
+    message: '', 
+    messageTextColor: '', 
+    iconBorderColor: '',
+    iconType: ''
+});
 
 const { products, error, load } = getAllProducts();
 
@@ -134,31 +176,68 @@ function handleDeleteRequest(request) {
 function reinitalize(overlayState) {
     productItemInfo.value = [];
     itemToDelete.value = [];
+    requestedModal.value = ''
 
     renderOverlay(overlayState);
 };
 
-function handleSubmit({ responseType, item }) {
-    if (responseType === 'add') {
-        item.id = productList.value.length + 1
-        productList.value.push(item);
-    } else if (responseType === 'updated') {
-        productList.value[item.id - 1].sku = item.sku;
-        productList.value[item.id - 1].name = item.name;
-        productList.value[item.id - 1].category = item.category;
-        productList.value[item.id - 1].price = item.price;
-    } else {
-        console.log('No update');
-    };
-    
-    renderOverlay(false); // change this later
+function showMessageModal({ message, iconType, color = 'var(--color-valid)' }) {
+    messageModalInfo.message = message;
+    messageModalInfo.messageTextColor = color;
+    messageModalInfo.iconBorderColor = color;
+    messageModalInfo.iconType = iconType;
+
+    requestedModal.value = 'message';
 };
 
-function handleConfirmedDelete() {
+function updateProduct(product) {
+    const targetProduct = productList.value[product.id - 1];
+
+    if (!targetProduct) return;
+
+    Object.assign(targetProduct, {
+        sku: product.sku,
+        name: product.name,
+        category: product.category,
+        price: product.price
+    });
+};
+
+function handleSubmit({ responseType, item }) {
+    if (responseType === 'add') {
+        item.id = productList.value.length + 1;
+        productList.value.push(item);
+
+        showMessageModal({
+            message: 'Product added successfully!',
+            iconType: 'add'
+        });
+
+        return;
+    };
+
+    if (responseType === 'updated') {
+        updateProduct(item);
+
+        showMessageModal({
+            message: 'Product updated successfully!',
+            iconType: 'update'
+        });
+
+        return;
+    };
+
+    showMessageModal({
+        message: 'No changes occurred...',
+        iconType: 'nochange'
+    });
+};
+
+async function handleConfirmedDelete() {
     const itemID = productItemInfo.value.id
     const { error, onDelete } = deleteProduct(itemID);
 
-    onDelete();
+    await onDelete();
 
     if (error.value === null) {
         for(let iter = 0; iter < productList.value.length; iter++) {
@@ -167,8 +246,12 @@ function handleConfirmedDelete() {
                 break;
             };
         };
-    
-        reinitalize(false); // change this later
+
+        messageModalInfo.message = 'Product deleted successfully!';
+        messageModalInfo.messageTextColor = 'var(--color-valid)';
+        messageModalInfo.iconBorderColor = 'var(--color-valid)';
+        messageModalInfo.iconType = 'delete'
+        requestedModal.value = 'message'
     };
 };
 </script>
@@ -176,6 +259,7 @@ function handleConfirmedDelete() {
 <style scoped>
 #products {
     width: 100%;
+    position: relative;
 }
 
 #header {
