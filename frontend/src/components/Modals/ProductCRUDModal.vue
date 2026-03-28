@@ -75,6 +75,7 @@
                         <NudeButton 
                             text="Reset"
                             txt-color="var(--color-secondary)"
+                            @on-click="handleOnReset"
                         />
                         <PrimaryButton
                             :text="isEdit ? 'Edit Item' : 'Add Item'"
@@ -139,6 +140,12 @@ const inputProductName = ref(props.productItem.name);
 const inputCategory = ref(props.productItem.category);
 const inputPrice = ref(props.productItem.price);
 
+// For resetting edit
+const originalInputSKUID = ref(inputSKUID.value); 
+const originalProductName = ref(inputProductName.value); 
+const originalCategory = ref(inputCategory.value); 
+const originalPrice = ref(inputPrice.value); 
+
 const stateInputSKUID = ref(
     props.productItem.sku === '' ||
     props.productItem.sku === undefined ?
@@ -194,6 +201,43 @@ function getInputFromChild({ inputID, value }) {
 
 function handleOnCancel() {
     emits('onCancel');
+};
+
+function handleOnReset() {
+    const inputMap = [
+        inputSKUID,
+        inputProductName,
+        inputCategory,
+        inputPrice
+    ];
+
+    const stateMap = [
+        stateInputSKUID,
+        stateInputProductName,
+        stateInputCategory,
+        stateInputPrice
+    ];
+    
+    if (props.isEdit) {
+        const originalInputMap = [
+            originalInputSKUID,
+            originalProductName,
+            originalCategory,
+            originalPrice
+        ];
+
+        inputMap.forEach((el, index) => {
+            el.value = originalInputMap[index].value;
+        });
+    } else {
+        inputMap.forEach(el => {
+            el.value = '';
+        });
+
+        stateMap.forEach(el => {
+           el.value = 'default'; 
+        });
+    };
 };
 
 async function handleOnSubmit() {

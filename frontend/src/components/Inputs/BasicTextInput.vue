@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 const props = defineProps({
     inputID: {
@@ -49,6 +49,10 @@ const emits = defineEmits([
 const hasHint = ref(props.hint !== '');
 const inputValue = ref(props.inputV);
 const inputRef = ref(null);
+
+watch(() => props.inputV, (newValue) => {
+    inputValue.value = newValue;
+});
 
 function passInputValue(){
     emits('passValue', {
