@@ -1,0 +1,65 @@
+.simple-modal__container {
+    background-color: var(--color-primary);
+    border: 2px solid var(--color-accent);
+    border-radius: 5px;
+    box-shadow: -4px 4px 0 0 var(--color-secondary);
+    width: 435px;
+    min-height: 300px;
+    padding: 30px 20px;
+
+    transition: 0.3s;
+}
+
+.simple-modal__container #return {
+    cursor: pointer;
+    font-size: 14px;
+    margin-bottom: 15px;
+    display: inline-block;
+}
+
+.simple-modal__container #return svg,
+.simple-modal__container #return .return-text {
+    color: #505050c5;
+    display: inline-block;
+    transition: 0.3s;
+}
+
+.simple-modal__container #return svg {
+    margin-right: 7px;
+}
+
+.simple-modal__container #return:hover svg, 
+.simple-modal__container #return:hover .return-text {
+    color: var(--color-secondary);
+}
+
+.simple-modal__container #modal-title {
+    color: var(--color-secondary);
+    font-weight: bold;
+}
+
+.simple-modal__container form.simple-modal__form {
+    margin-top: 15px;
+}
+
+.simple-modal__container #bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.simple-modal__container #missing-container {
+    color: var(--color-secondary);
+    font-size: 13px;
+    font-weight: bold;
+    margin-left: 7px;
+}
+
+.simple-modal__container #actions {
+    flex: 1;
+
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    justify-content: right;
+}

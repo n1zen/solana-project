@@ -1,0 +1,55 @@
+.base-input__container {
+    --input-padding: 8px;
+
+    border: 2px solid var(--color-accent);
+    border-radius: 5px;
+    padding: 3px 7px;
+    position: relative;
+    transition: 0.3s;
+    
+    &.missing,
+    &.invalid {
+        border: 2px solid var(--color-secondary);
+    }
+    
+    &.valid {
+        border: 2px solid var(--color-valid);
+    }
+}
+
+.base-input__container .hint {
+    background-color: transparent;
+    color: #505050c3;
+    font-size: 16px;
+    font-weight: bold;
+    position: absolute;
+    top: 50%;
+    left: var(--input-padding);
+    transform: translateY(-50%);
+    transition: 0.3s;
+}
+
+.base-input__container input {
+    background-color: transparent;
+    border: none;
+    font-weight: bold;
+    padding: 6px var(--input-padding);
+    width: 100%;
+    outline: transparent;
+    position: relative;
+}
+
+.base-input__container:has(input:focus)>.hint,
+.base-input__container:has(input:not(:placeholder-shown))>.hint {
+    background-color: var(--color-primary);
+    font-size: 14px;
+    padding: 0 5px;
+    top: calc(0% - 2px);
+}
+
+.base-input__container .danger-text {
+    color: var(--color-secondary);
+    font-size: 14px;
+    font-weight: bold;
+    padding-left: 10px;
+}

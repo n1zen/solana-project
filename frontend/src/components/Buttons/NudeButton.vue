@@ -1,10 +1,14 @@
 <template>
     <div class="nude-button">
-        <button type="button" @click="handleOnClick()">
+        <button 
+            type="button" 
+            @click="handleOnClick()"
+            @mouseenter="handleOnMouseEnter"
+            @mouseleave="handleOnMouseLeave">
             <div id="icon">
                 <slot name="sIcon"></slot>
             </div>
-            <div 
+            <p 
                 id="text"
                 :style="{
                     color: txtColor,
@@ -12,7 +16,7 @@
                 }"
                 >
                 {{ text }}
-            </div>
+            </p>
         </button>
     </div>
 </template>
@@ -42,16 +46,26 @@ const props = defineProps({
 });
 
 const emits = defineEmits([
-    'onClick'
+    'onClick',
+    'onMouseEnter',
+    'onMouseLeave'
 ]);
 
 function handleOnClick() {
     emits('onClick');
 };
+
+function handleOnMouseEnter() {
+    emits('onMouseEnter');
+}
+
+function handleOnMouseLeave() {
+    emits('onMouseLeave');
+}
 </script>
 
 <style scoped>
-    button {
+button {
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -65,5 +79,9 @@ function handleOnClick() {
 
 #icon {
     padding-bottom: 2px;
+}
+
+#text {
+    transition: 0.3s;
 }
 </style>

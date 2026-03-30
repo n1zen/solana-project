@@ -1,4 +1,16 @@
 <template>
+    <transition name="fade">
+        <Overlay
+            v-if="isOverlayCalled"
+            @on-click=""
+            >
+            <template>
+                <transition name="fade">
+                    
+                </transition>
+            </template>
+        </Overlay>
+    </transition>
     <div class="page" id="page-inventory">
         <div id="inventory">
             <section id="header">
@@ -39,6 +51,7 @@ import { onMounted, ref } from 'vue';
 // Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 import SimpleTable from '@/components/Tables/SimpleTable/SimpleTable.vue';
+import Overlay from '@/components/Modals/Overlay.vue';
 
 // Modules
 import getAllProducts from '@/modules/product/getAllProducts';
@@ -61,6 +74,10 @@ const legends = [
 // ];
 const rows = ref([]);
 
+// Variables for Child
+const isOverlayCalled = ref(false);
+const modalType = ref(null); // String
+
 // Load data after mount
 onMounted(async () => {
     await load();
@@ -76,7 +93,7 @@ onMounted(async () => {
             let length = Object.keys(data).length
 
             // Get all values from the data
-            Object.values(data).forEach((value, index) => {
+            Object.values(data).forEach(value => {
                 newItem.push(value);
             });
 
