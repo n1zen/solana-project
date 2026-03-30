@@ -10,7 +10,7 @@
             @mouseenter="isHovered = true; handleOnHover()"
             @mouseleave="isHovered = false; handleOnLeave()"
             >
-            <div id="icon">
+            <div id="icon" v-if="hasIcon">
                 <slot name="sIcon"></slot>
             </div>
             <div id="text" 
