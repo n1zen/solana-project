@@ -1,5 +1,5 @@
 # SOLANA ATELIER APP
-This is a full-stack web application for [Solana Atelier](https://www.solanaatelier.com). This app is mainly a **Point of Sales** system.It will be used to mainly be a cashier terminal for shopkeepers and can also be used as an **Inventory Manager**.
+This is a full-stack web application for [Solana Atelier](https://www.solanaatelier.com). This app is mainly a **Point of Sales** system. It will be used to mainly be a cashier terminal for shopkeepers and can also be used as an **Inventory Manager**.
 
 ## Features
 
