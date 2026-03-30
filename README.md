@@ -22,6 +22,19 @@ A calendar to show previous, current, and future events such as pop-up market ev
 ### Wix Syncing
 Be able to sync the products on existing wix website.
 
+# Project Setup
+
+### Get Docker
+> Install [Docker](https://www.docker.com) for your machine
+
+### Clone this repository
+```
+git clone https://github.com/n1zen/solana-project.git
+```
+### Build the app using docker
+```
+docker compose up --build
+```
 
 ## Developers
 - Louie Izen B. Torres | [n1zen](https://www.github.com/n1zen)
