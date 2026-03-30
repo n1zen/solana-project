@@ -1,13 +1,11 @@
 import { ref } from 'vue';
-import { useRouter } from 'vue-router';
 const deleteProduct = (id) => {
 
-    const delError = ref(null);
-    const router = useRouter();
+    const error = ref(null);
 
     const onDelete = async () => {
         try {
-            const response = await fetch(`${process.env.VUE_APP_API_URL}/api/products/` + id, {
+            const response = await fetch(`http://localhost:8000/api/products/${id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' }
             });
@@ -20,16 +18,15 @@ const deleteProduct = (id) => {
                 throw Error(message);
             }
 
-            alert('Product deleted successfully');
-            router.push({ name: 'products' });
+            // alert('Product deleted successfully');
         } catch (err) {
             error.value = err.message;
-            alert(error.value);
+            // alert(error.value);
             console.error(err.message);
         }
     }
 
-    return { delError, onDelete };
+    return { error, onDelete };
 }
 
 export default deleteProduct;

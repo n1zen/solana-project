@@ -1,5 +1,5 @@
 <template>
-    <div id="overlay">
+    <div id="overlay" @click="handleOnClick()">
         <div id="surface-container">
             <slot name="sSurface"></slot>
         </div>
@@ -7,7 +7,13 @@
 </template>
 
 <script setup>
+const emits = defineEmits([
+    'onClick'
+]);
 
+function handleOnClick() {
+    emits('onClick', false)
+};
 </script>
 
 <style scoped>
