@@ -12,6 +12,32 @@ from schemas import OrderItemCreate, OrderItemResponse, OrderItemUpdate, OrderCr
 
 router = APIRouter()
 
+# check if order does not exists
+async def order_does_not_exists(type: str, content: int, db):
+    if type == "id":
+        result = await db.execute(
+            select(models.Order).options(
+                selectinload(models.Order.order_items)
+                .selectinload(models.OrderItem.inventory_item)
+                .selectinload(models.InventoryItem.product)
+            ).where(models.Order.id == content)
+        )
+    elif type == "number":
+        result = await db.execute(
+            select(models.Order).options(
+                selectinload(models.Order.order_items)
+                .selectinload(models.OrderItem.inventory_item)
+                .selectinload(models.InventoryItem.product)
+            ).where(models.Order.order_number == content)
+        )
+    order = result.scalars().first()
+    if order:
+        return order
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail="Order does not exist"
+    )
+
 # validate if cashier/user exists
 async def cashier_exists(cashier_id: int, db):
     result = await db.execute(
@@ -124,3 +150,20 @@ async def get_all_orders(db: Annotated[AsyncSession, Depends(get_db)]):
     )
     orders = result.scalars().all()
     return orders
+
+# get an order by id
+@router.get("/orderid/{order_id}", response_model=OrderResponse)
+async def get_order_by_id(order_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    order = order_does_not_exists("id", order_id, db)
+    return order
+
+@router.get("/ordernumber/{order_number}", response_model=OrderResponse)
+async def get_order_by_number(order_number: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    order = order_does_not_exists("number", order_number, db)
+    return order
+
+# @router.patch("/{order_id}", response_model=OrderResponse)
+# async def update_order(order_id: int, updated_order: OrderItemUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
+#     result = await db.execute(
+#         select(models.Order).where()
+#     )
