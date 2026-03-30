@@ -48,6 +48,8 @@
                     :index="index"
                     :is-currently-clicked="activeRowIndex === index"
                     @on-click="handleClickFromSimpleRow"
+                    @on-edit="handleEditRequestFromRow"
+                    @on-delete=""
                 />
             </tbody>
         </table>
@@ -59,8 +61,10 @@
 import { PackageOpen, Plus } from 'lucide-vue-next';
 import SimpleRow from './SimpleRow.vue';
 
-//
-import { onMounted, ref } from 'vue';
+// Vue
+import { ref } from 'vue';
+
+// Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 
 /**
@@ -88,12 +92,20 @@ const props = defineProps({
     },
 });
 
+const emits = defineEmits([
+    'onRowEdit'
+]);
+
 // Variables for Child
 const activeRowIndex = ref(null);
 
 // Function From Child
-function handleClickFromSimpleRow(childIndex) {
-    activeRowIndex.value = childIndex;
+function handleClickFromSimpleRow(rowIndex) {
+    activeRowIndex.value = rowIndex;
+};
+
+function handleEditRequestFromRow(rowIndex) {
+    emits('onRowEdit', rowIndex);
 };
 </script>
 

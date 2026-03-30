@@ -2,10 +2,15 @@
     <div id="simple-modal" @click.stop="">
         <div class="simple-modal__container">
             <section id="return">
-                <ArrowLeft 
-                    size="10"
-                />
-                <p class="return-text">{{ returnText }}</p>
+                <button
+                    type="button"
+                    @click="handleOnCancel"
+                    >
+                    <ArrowLeft 
+                        size="10"
+                    />
+                    <p class="return-text">{{ returnText }}</p>
+                </button>
             </section>
             <header>
                 <p id="modal-title">{{ modalTitle }}</p>
@@ -80,6 +85,10 @@ import { ArrowLeft, Plus, SquarePen } from 'lucide-vue-next';
 // Vue
 import { ref } from 'vue';
 
+// Modules
+import addProduct from '@/modules/product/addProduct';
+import updateProduct from '@/modules/product/updateProduct';
+
 // Components
 import SimpleTextInput from '../Inputs/SimpleTextInput.vue';
 import SimpleDropdownInput from '../Inputs/SimpleDropdownInput.vue';
@@ -99,6 +108,8 @@ import PrimaryButton from '../Buttons/PrimaryButton.vue';
  * { id: Number, value: String }
  * 
  * modalType accepts: 'add', 'edit'
+ * 
+ * itemType accepts: 'product = 0', 'inventory = 1'
  */
 const props = defineProps({
     fields: {
@@ -107,14 +118,18 @@ const props = defineProps({
     },
     modelValues: {
         type: Array,
+        required: true
     },
-    returnText: {
-        type: String,
-        default: 'Return'
+    rowIDForEdit: {
+        type: Number,
     },
     modalTitle: {
         type: String,
         default: 'Modal Title'
+    },
+    itemType: {
+        type: Number,
+        required: true
     },
     modalType: {
         type: String,
@@ -127,26 +142,32 @@ const props = defineProps({
     missingText: {
         type: String,
         default: 'This is a missing text!'
-    }
+    },
+    returnText: {
+        type: String,
+        default: 'Return'
+    },
 });
 
 const emits = defineEmits([
-    'onSubmit'
+    'onCancel',
+    // 'onSubmit'
 ]);
 
 const inputData = ref([]);
 const hasMissingInput = ref(false);
 
 // Initialise inputData
-props.modelValues?.forEach(value => {
-    console.log(value);
+props.modelValues?.forEach(item => {
+    console.log(item); // use for debug
     let newInputData = {
-        id: value.id,
-        value: value.value,
-        state: value === '' ? 'default' : 'valid'
+        id: item.id,
+        value: item.value,
+        state: item.value === '' ? 'default' : 'valid'
     };
 
     inputData.value.push(newInputData);
+    console.log(inputData.value); // use for debug
 });
 
 
@@ -171,8 +192,70 @@ function handleOnInputFromSimpleInputs(childObj) {
     inputData.value[index].state = newValue === '' ? 'default' : 'valid';
 };
 
-function handleOnSubmit() {
-    console.log(inputData.value);
+function handleOnCancel() {
+    emits('onCancel', false); // false means turn of modal
+};
+
+async function handleOnSubmit() {
+    const itemTemplates = [
+        { // Products
+            sku: 0,
+            name: 'Product Name',
+            category: 'Category',
+            price: 0,
+        },
+        { // Inventory
+            productID: 0,
+            details: '',
+            quantity: 0
+        },
+        { // Orders
+
+        }
+    ];
+
+    const addEditTypes = [
+        { // Product
+            add: addProduct,
+            edit: updateProduct
+        },
+        { // Inventory
+
+        },
+        { // Orders
+
+        }
+    ];
+
+    const itemTemplate = itemTemplates[props.itemType];
+    
+    Object.keys(itemTemplate).forEach((key, index) => {
+        itemTemplate[key] = inputData.value[index].value;
+    });
+    
+    const id = props.rowIDForEdit + 1 // The plus one here is for the server
+
+    if (id) Object.assign(itemTemplate, { id });
+
+    const modules = addEditTypes[props.itemType];
+    const action = props.modalType === 'add' ? modules.add : modules.edit
+    const { error, onSubmit } = action(itemTemplate);
+
+    // await onSubmit();
+
+    // if (error.value === null) {
+
+    // } else {
+
+    // };
+};
+
+function handleMissingInput() {
+
+};
+
+function handleExistingInput() {
+
 };
 </script>
 

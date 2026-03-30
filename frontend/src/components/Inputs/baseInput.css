@@ -24,7 +24,7 @@
     font-weight: bold;
     position: absolute;
     top: 50%;
-    left: var(--input-padding);
+    left: 13px;
     transform: translateY(-50%);
     transition: 0.3s;
 }

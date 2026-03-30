@@ -2,11 +2,22 @@
     <transition name="fade">
         <Overlay
             v-if="isOverlayCalled"
-            @on-click=""
+            @on-click="reinitializeModalVariables"
             >
-            <template>
+            <template #sSurface>
                 <transition name="fade">
-                    
+                    <SimpleAddEditModal 
+                        v-if="
+                        modalType === 'add' ||
+                        modalType === 'edit'
+                        "
+                        :fields="modalAddEditFields"
+                        :model-values="modalModelValues"
+                        :modal-type="modalType"
+                        :itemType="0"
+                        :row-i-d-for-edit="activeTableRow"
+                        @on-cancel="reinitializeModalVariables"
+                    />
                 </transition>
             </template>
         </Overlay>
@@ -21,7 +32,7 @@
                         :has-icon="true"
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
-                        @on-click="handleAddRequest"
+                        @on-click="handleNewItemRequest"
                     >
                         <template #sIcon>
                              <Plus 
@@ -36,6 +47,7 @@
                 table-i-d="inventory"
                 :legends="legends"
                 :rows="rows"
+                @on-row-edit="handleTableRowEdit"
             />
         </div>
     </div>
@@ -52,6 +64,7 @@ import { onMounted, ref } from 'vue';
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 import SimpleTable from '@/components/Tables/SimpleTable/SimpleTable.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
+import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
 
 // Modules
 import getAllProducts from '@/modules/product/getAllProducts';
@@ -72,11 +85,25 @@ const legends = [
 //     { id: 'quantity', text: 'Quantity' },
 //     { id: 'actions', text: 'Actions' },
 // ];
-const rows = ref([]);
+const rows = ref([]); // Used for table rows
+// Do see the SimpleAddEditModal.vue for field object
+const modalAddEditFields = [ // Change this later to inventory
+    { id: 1, type: 'text',  hintText: 'SKU ID*' },
+    { id: 2, type: 'text',  hintText: 'Product Name*' },
+    { id: 3, type: 'dropdowntext',  hintText: 'Category*' },
+    { id: 4, type: 'text',  hintText: 'Price*' },
+];
 
 // Variables for Child
 const isOverlayCalled = ref(false);
 const modalType = ref(null); // String
+const modalModelValues = ref([
+    { id: 1, value: '' },
+    { id: 2, value: '' },
+    { id: 3, value: '' },
+    { id: 4, value: '' },
+]);
+const activeTableRow = ref(null);
 
 // Load data after mount
 onMounted(async () => {
@@ -110,15 +137,36 @@ onMounted(async () => {
 const btnAddIconColor = ref("#FFFAFA");
 
 // Function Appearances
-
-// Function Handlers
-
 function changeButtonAddIconColor() {
     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
 };
 
-function handleAddRequest() {
+function reinitializeModalVariables() {
+    isOverlayCalled.value = false;
+    modalType.value = null;
 
+    modalModelValues.value.forEach(item => {
+        item.value = '';
+    });
+};
+
+// Function Handlers
+function handleNewItemRequest() {
+    isOverlayCalled.value = true;
+    modalType.value = 'add'
+    activeTableRow.value = null;
+};
+
+function handleTableRowEdit(rowID) {
+    const row = rows.value[rowID];
+    
+    activeTableRow.value = rowID;
+    isOverlayCalled.value = true;
+    modalType.value = 'edit';
+
+    modalModelValues.value.forEach((item, index) => {
+        item.value = row[index];
+    });
 };
 </script>
 

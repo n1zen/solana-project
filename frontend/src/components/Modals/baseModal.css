@@ -11,7 +11,6 @@
 }
 
 .simple-modal__container #return {
-    cursor: pointer;
     font-size: 14px;
     margin-bottom: 15px;
     display: inline-block;
@@ -31,6 +30,14 @@
 .simple-modal__container #return:hover svg, 
 .simple-modal__container #return:hover .return-text {
     color: var(--color-secondary);
+}
+
+.simple-modal__container #return button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    outline: none;
 }
 
 .simple-modal__container #modal-title {

@@ -13,13 +13,19 @@
                 class="actions" 
                 v-else
                 >
-                <button class="edit">
+                <button 
+                    class="edit"
+                    @click="handleOnEdit"
+                    >
                     <SquarePen 
                         size="20"
                         :class="''"
                     />
                 </button>
-                <button class="delete">
+                <button 
+                    class="delete"
+                    @click="handleOnDelete"
+                    >
                     <SquareX 
                         size="20"
                     />
@@ -34,7 +40,7 @@
 import { SquarePen, SquareX } from 'lucide-vue-next';
 
 // Vue
-import { ref } from 'vue';
+
 
 // Components
 
@@ -61,6 +67,8 @@ const props= defineProps({
 
 const emits = defineEmits([
     'onClick',
+    'onEdit',
+    'onDelete'
 ])
 
 // Variables for appearance
@@ -75,6 +83,13 @@ function handleOnClick() {
     emits('onClick', props.index);
 };
 
+function handleOnEdit() {
+    emits('onEdit', props.index);
+};
+
+function handleOnDelete() {
+    emits('onDelete', props.index);
+};
 </script>
 
 <style scoped>

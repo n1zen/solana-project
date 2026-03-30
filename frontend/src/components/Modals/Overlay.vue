@@ -12,7 +12,7 @@ const emits = defineEmits([
 ]);
 
 function handleOnClick() {
-    emits('onClick', false)
+    emits('onClick', false);
 };
 </script>
 
