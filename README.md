@@ -19,7 +19,8 @@ Shopkeepers should be able to create sales report by the end of the day by using
 ### Calendar of Events
 A calendar to show previous, current, and future events such as pop-up market events, and special anniversary events.
 
-### TBA
+### Wix Syncing
+Be able to sync the products on existing wix website.
 
 
 ## Developers
