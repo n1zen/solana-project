@@ -154,16 +154,18 @@ async def get_all_orders(db: Annotated[AsyncSession, Depends(get_db)]):
 # get an order by id
 @router.get("/orderid/{order_id}", response_model=OrderResponse)
 async def get_order_by_id(order_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    order = order_does_not_exists("id", order_id, db)
+    order = await order_does_not_exists("id", order_id, db)
     return order
 
+# get an order by order_number
 @router.get("/ordernumber/{order_number}", response_model=OrderResponse)
 async def get_order_by_number(order_number: int, db: Annotated[AsyncSession, Depends(get_db)]):
-    order = order_does_not_exists("number", order_number, db)
+    order = await order_does_not_exists("number", order_number, db)
     return order
 
-# @router.patch("/{order_id}", response_model=OrderResponse)
-# async def update_order(order_id: int, updated_order: OrderItemUpdate, db: Annotated[AsyncSession, Depends(get_db)]):
-#     result = await db.execute(
-#         select(models.Order).where()
-#     )
+# delete an order
+@router.delete("/{order_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_order(order_id: int, db: Annotated[AsyncSession, Depends(get_db)]):
+    order = await order_does_not_exists("id", order_id, db)
+    await db.delete(order)
+    await db.commit()
