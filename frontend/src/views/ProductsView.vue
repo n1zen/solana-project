@@ -22,6 +22,7 @@
                     <MessageModal 
                         v-else-if="modalType === 'message'"
                         :message="successfulMessage"
+                        @on-confirm="reinitializeModalVariables"
                         >
                         <template #sMessageIcon>
                             <PackagePlus 
@@ -46,6 +47,15 @@
                             />
                         </template>
                     </MessageModal>
+                    <DeleteModal 
+                        v-else-if="modalType === 'delete'"
+                        text-title="product"
+                        desc="This action will permanently delete this product."
+                        :item-i-d="deleteRowItemID"
+                        :item-name="deleteItemName"
+                        :items="deleteTableValues"
+                        @on-confirm="handleSubmitFromModal"
+                    />
                 </transition>
             </template>
         </Overlay>
@@ -78,6 +88,7 @@
                 :table-state="tableState"
                 table-state-text="Product list"
                 @on-row-edit="handleTableRowEdit"
+                @on-row-delete="handleTableRowDelete"
                 @on-empty-add="handleNewItemRequest"
             />
         </div>
@@ -95,11 +106,12 @@ import { onMounted, ref } from 'vue';
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 import SimpleTable from '@/components/Tables/SimpleTable/SimpleTable.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
+import MessageModal from '@/components/Modals/MessageModal.vue';
 import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
 
 // Modules
 import getAllProducts from '@/modules/product/getAllProducts';
-import MessageModal from '@/components/Modals/MessageModal.vue';
+import DeleteModal from '@/components/Modals/DeleteModal.vue';
 
 // Variables for inits
 const { products, error, load } = getAllProducts(); 
@@ -127,11 +139,19 @@ const isOverlayCalled = ref(false);
 const activeTableRow = ref(null);
 const tableState = ref('loading'); // default this to loading
 const successfulMessage = ref('');
+const deleteRowItemID = ref(null);
+const deleteItemName = ref(null);
 const modalModelValues = ref([
     { id: 1, value: '' },
     { id: 2, value: '' },
     { id: 3, value: '' },
     { id: 4, value: '' },
+]);
+const deleteTableValues = ref([
+    { legend: 'SKUID', value: '' },
+    { legend: 'Product Name', value: '' },
+    { legend: 'Category', value: '' },
+    { legend: 'Price', value: '' }
 ]);
 
 // Load data after mount
@@ -148,12 +168,18 @@ function changeButtonAddIconColor() {
 };
 
 function reinitializeModalVariables() {
-    modalType.value = null;
     isOverlayCalled.value = false;
     successfulMessage.value = '';
+    modalType.value = null;
     messageIcon.value = null;
+    deleteRowItemID.value = null;
+    deleteItemName.value = null;
 
     modalModelValues.value.forEach(item => {
+        item.value = '';
+    });
+
+    deleteTableValues.value.forEach(item => {
         item.value = '';
     });
 };
@@ -177,14 +203,33 @@ function handleTableRowEdit(rowID) {
     modalModelValues.value.forEach((item, index) => {
         item.value = row[index];
     });
+
+    console.log(modalModelValues.value);
+};
+
+// Opens the modal for delete
+function handleTableRowDelete(rowItemID, rowIndex) {
+    const row = rows.value[rowIndex];
+    console.log(rowItemID);
+    
+    deleteRowItemID.value = rowItemID;
+    activeTableRow.value = rowIndex;
+    isOverlayCalled.value = true;
+    modalType.value = 'delete';
+    
+    deleteTableValues.value.forEach((item, index) => {
+        item.value = row[index];
+    });
+
+    deleteItemName.value = deleteTableValues.value[1].value;
 };
 
 // Handle successful add/edit submission from modal
-async function handleSubmitFromModal(item, hasNoChangesOnEdit) {
+async function handleSubmitFromModal(item, hasNoChangesOnEdit = false) {
     const messageTemplates = {
         add: `${ item.name } has been added successfully!`,
         edit: `${ item.name } has been updated successfully!`,
-        delete: `${ item.name } has been removed successfully!`,
+        delete: `${ item } has been removed successfully!`,
     };
 
     if (hasNoChangesOnEdit) messageIcon.value = 'noChangesIcon';
@@ -236,7 +281,7 @@ async function loadItems() {
 
         // use for debug
         // console.log('==============')
-        // console.log('productData: ');
+        // console.log('Rows: ');
         // console.log(rows.value); 
     } else {
         tableState.value = 'empty';

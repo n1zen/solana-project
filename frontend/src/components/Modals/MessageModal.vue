@@ -1,6 +1,6 @@
 <template>
     <div id="message-modal" @click.stop="">
-        <div class="container">
+        <div class="simple-modal__container">
             <header>
                 <div 
                     id="message-icon"
@@ -74,13 +74,12 @@ function handleOnConfirm() {
 </script>
 
 <style scoped>
-.container {
-    background-color: var(--color-primary);
-    border-radius: 5px;
-    box-shadow: -4px 4px 0 0 var(--color-secondary);
+@import './baseModal.css';
+
+#message-modal .simple-modal__container {
     width: 238px;
-    padding: 30px 20px;
 }
+
 
 header {
     display: flex;

@@ -63,7 +63,7 @@
                     :is-currently-clicked="activeRowIndex === index"
                     @on-click="handleClickFromSimpleRow"
                     @on-edit="handleEditRequestFromRow"
-                    @on-delete=""
+                    @on-delete="handleDeleteRequestFromRow"
                 />
             </tbody>
         </table>
@@ -116,6 +116,7 @@ const props = defineProps({
 
 const emits = defineEmits([
     'onRowEdit',
+    'onRowDelete',
     'onEmptyAdd'
 ]);
 
@@ -129,6 +130,10 @@ function handleClickFromSimpleRow(rowIndex) {
 
 function handleEditRequestFromRow(rowIndex) {
     emits('onRowEdit', rowIndex);
+};
+
+function handleDeleteRequestFromRow(rowItemID, rowIndex) {
+    emits('onRowDelete', rowItemID, rowIndex);
 };
 
 function handleEmptyAddRequest() {

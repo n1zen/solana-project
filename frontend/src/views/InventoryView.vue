@@ -22,6 +22,7 @@
                     <MessageModal 
                         v-else-if="modalType === 'message'"
                         :message="successfulMessage"
+                        @on-confirm="reinitializeModalVariables"
                         >
                         <template #sMessageIcon>
                             <PackagePlus 
@@ -46,6 +47,9 @@
                             />
                         </template>
                     </MessageModal>
+                    <DeleteModal 
+                        v-else-if="modalType === 'delete'"
+                    />
                 </transition>
             </template>
         </Overlay>
@@ -78,6 +82,7 @@
                 :table-state="tableState"
                 table-state-text="Inventory"
                 @on-row-edit="handleTableRowEdit"
+                @on-row-delete=""
                 @on-empty-add="handleNewItemRequest"
             />
         </div>
@@ -95,11 +100,11 @@ import { onMounted, ref } from 'vue';
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 import SimpleTable from '@/components/Tables/SimpleTable/SimpleTable.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
+import MessageModal from '@/components/Modals/MessageModal.vue';
 import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
 
 // Modules
 import getAllInventory from '@/modules/inventory/getAllInventory';
-import MessageModal from '@/components/Modals/MessageModal.vue';
 
 // Variables for inits
 const { inventory, error, load } = getAllInventory();
@@ -172,10 +177,18 @@ function handleTableRowEdit(rowID) {
     activeTableRow.value = rowID;
     isOverlayCalled.value = true;
     modalType.value = 'edit';
-
+    
     modalModelValues.value.forEach((item, index) => {
         item.value = row[index];
     });
+};
+
+function handleTableRowDelete(rowID) {
+    const row = rows.value[rowID];
+
+    activeTableRow.value = rowID;
+    isOverlayCalled.value = true;
+    modalType.value = 'delete';
 };
 
 // Handle successful add/edit submission from modal

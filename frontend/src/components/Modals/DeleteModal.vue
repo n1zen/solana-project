@@ -1,6 +1,6 @@
 <template>
     <div id="delete-modal"  @click.stop="">
-        <div class="container">
+        <div class="simple-modal__container">
             <section id="return">
                 <NudeButton 
                     text="Cancel" 
@@ -16,15 +16,15 @@
                 </NudeButton>
             </section>
             <header>
-                <p id="title">Delete {{ textTitle }} item</p>
+                <p id="title">Delete {{ textTitle }} item?</p>
                 <p class="description" id="desc">{{ desc }}</p>
                 <p class="description" id="desc-2">Are you sure to proceed?</p>
             </header>
             <section id="info">
                 <table>
                     <tr v-for="item in items">
-                       <td class="type">{{ item.type }} :</td> 
-                       <td class="data">{{ item.data }}</td> 
+                       <td class="type">{{ item.legend }} :</td> 
+                       <td class="data">{{ item.value }}</td> 
                     </tr>
                 </table>
             </section>
@@ -49,13 +49,25 @@
 </template>
 
 <script setup>
+// Import outside
 import {  ArrowLeft, Trash } from 'lucide-vue-next';
 
+// Vue
+import { ref } from 'vue';
+
+// Components
 import PrimaryButton from '../Buttons/PrimaryButton.vue';
 import NudeButton from '../Buttons/NudeButton.vue';
 
-import { ref } from 'vue';
+// Modules
+import deleteProduct from '@/modules/product/deleteProduct';
 
+// Variables for initialisations
+/**
+ * items array acts as a table for the row
+ * to be deleted and looks something like
+ * { legend: String, value: String || Number }
+ */
 const props = defineProps({
     textTitle: {
         type: String,
@@ -64,6 +76,12 @@ const props = defineProps({
     desc: {
         type: String,
         default: 'A description for the delete modal.'
+    },
+    itemID: {
+        type: Number,
+    },
+    itemName: {
+        type: String,
     },
     items: {
         type: Array,
@@ -87,20 +105,22 @@ function handleOnCancel() {
     emits('onCancel');
 };
 
-function handleOnConfirm() {
-    emits('onConfirm');
+async function handleOnConfirm() {
+    const { error, onDelete } = deleteProduct(props.itemID);
+
+    await onDelete();
+
+    if (error.value === null) {
+        emits('onConfirm', props.itemName);
+    } else {
+        // add a catcher if possible
+    };
+
 };
 </script>
 
 <style scoped>
-.container {
-    background-color: var(--color-primary);
-    border-radius: 5px;
-    box-shadow: -4px 4px 0 0 var(--color-secondary);
-    width: 435px;
-    min-height: 300px;
-    padding: 30px 20px;
-}
+@import './baseModal.css';
 
 p {
     font-weight: bold;
@@ -114,22 +134,14 @@ p {
     color: var(--color-accent);
 }
 
-header {
-    margin-bottom: 15px;
-}
-
-#return {
-    margin-bottom: 15px;
-}
-
 #info {
     padding: 0 7px;
-    margin-bottom: 30px;
+    margin: 20px 0 30px;
 }
 
 table {
-    border-collapse: collapse;
-    border-spacing: 0;
+    border-collapse: separate;
+    border-spacing: 0 5px;
     width: 100%;
 }
 

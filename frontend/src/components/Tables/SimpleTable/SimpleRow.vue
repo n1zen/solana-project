@@ -39,13 +39,6 @@
 // Imports outside
 import { SquarePen, SquareX } from 'lucide-vue-next';
 
-// Vue
-
-
-// Components
-
-// Modules
-
 // Variables for inits
 /**
  * See SimpleTable.vue to understand what is data
@@ -71,15 +64,9 @@ const emits = defineEmits([
     'onDelete'
 ])
 
-// Variables for appearance
-// const rowClickedState = ref(false)
-
-// Function Appearances
-
-
 // Function Handlers
 function handleOnClick() {
-    // rowClickedState.value = !rowClickedState.value;
+    console.log(props.data);
     emits('onClick', props.index);
 };
 
@@ -88,7 +75,10 @@ function handleOnEdit() {
 };
 
 function handleOnDelete() {
-    emits('onDelete', props.index);
+    const length = props.data.length - 1;
+    const itemID = props.data[length];
+
+    emits('onDelete', itemID, props.index);
 };
 </script>
 

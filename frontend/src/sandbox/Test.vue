@@ -4,10 +4,8 @@
         <!-- <Nav /> -->
         <!-- <NavButton /> -->
         <!-- <PrimaryButton /> -->
-        <!-- <ProductTable /> -->
         <Overlay>
             <template #sSurface>
-                <!-- <ProductCRUDModal /> -->
                 <!-- <DeleteModal 
                     textTitle="product"
                     desc="This action will permanently delete this product."
@@ -94,9 +92,7 @@
 import Nav from '@/components/Nav/Nav.vue';
 import NavButton from '@/components/Buttons/NavButton.vue';
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
-import ProductTable from '@/components/Tables/ProductTable/ProductTable.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
-import ProductCRUDModal from '@/components/Modals/ProductCRUDModal.vue';
 import BasicTextInput from '@/components/Inputs/BasicTextInput.vue';
 import DeleteModal from '@/components/Modals/DeleteModal.vue';
 import MessageModal from '@/components/Modals/MessageModal.vue';
