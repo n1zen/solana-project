@@ -89,6 +89,7 @@ import { ref } from 'vue';
 import addProduct from '@/modules/product/addProduct';
 import updateProduct from '@/modules/product/updateProduct';
 import addInventoryItem from '@/modules/inventory/addInventoryItem';
+import updateInventoryItem from '@/modules/inventory/updateInventoryItem';
 
 // Components
 import SimpleTextInput from '../Inputs/SimpleTextInput.vue';
@@ -105,8 +106,7 @@ import PrimaryButton from '../Buttons/PrimaryButton.vue';
  * { id: Number, type: String, hintText: String }
  * The type key accepts: 'text', 'dropdowntext'
  * 
- * modelValues must depend on fields and contains:
- * { id: Number, value: String }
+ * modelValues must depend on fields
  * 
  * modalType accepts: 'add', 'edit'
  * 
@@ -118,10 +118,10 @@ const props = defineProps({
         required: true,
     },
     modelValues: {
-        type: Array,
+        type: Object,
         required: true
     },
-    rowIDForEdit: {
+    itemIDForEdit: {
         type: Number,
     },
     modalTitle: {
@@ -159,24 +159,15 @@ const inputData = ref([]);
 const hasMissingInput = ref(false);
 
 // Initialise inputData
-props.modelValues?.forEach(item => {
-    //use for debug
-    // console.log('==============')
-    // console.log('item: ');
-    console.log(item);
+Object.values(props.modelValues).forEach((item, index) => {
     let newInputData = {
-        id: item.id,
-        value: item.value,
-        state: item.value === '' ? 'default' : 'valid'
+        id: index + 1,
+        value: item,
+        state: item === '' ? 'default' : 'valid'
     };
 
     inputData.value.push(newInputData);
-    //use for debug
-    // console.log('==============')
-    // console.log('inputData: ');
-    // console.log(inputData.value); 
 });
-
 
 // Variables for appearance
 const resetButtonColor = ref('var(--color-accent)');
@@ -212,7 +203,7 @@ async function handleOnSubmit() {
             price: 0,
         },
         { // Inventory
-            product_id: 0,
+            product_sku: 0,
             details: '',
             quantity: 0
         },
@@ -228,7 +219,7 @@ async function handleOnSubmit() {
         },
         { // Inventory
             add: addInventoryItem,
-            edit: ''
+            edit: updateInventoryItem
         },
         { // Orders
 
@@ -236,13 +227,17 @@ async function handleOnSubmit() {
     ];
 
     const itemTemplate = itemTemplates[props.itemType];
+
+    // console.log('==============')
+    console.log('itemTemplate:');
+    console.log(itemTemplate);
     
     Object.keys(itemTemplate).forEach((key, index) => {
         itemTemplate[key] = inputData.value[index].value;
     });
     
-    if (props.rowIDForEdit) {
-        const id = props.rowIDForEdit + 1 // The plus one here is for the server
+    if (props.itemIDForEdit) {
+        const id = props.itemIDForEdit // The plus one here is for the server
     
         Object.assign(itemTemplate, { id });
     };

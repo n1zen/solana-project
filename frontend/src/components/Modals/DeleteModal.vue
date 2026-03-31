@@ -2,18 +2,15 @@
     <div id="delete-modal"  @click.stop="">
         <div class="simple-modal__container">
             <section id="return">
-                <NudeButton 
-                    text="Cancel" 
-                    :txt-color="btnCancelColor" 
-                    :fn-size="14"
-                    @on-click="handleOnCancel()"
-                >
-                    <template #sIcon>
-                        <ArrowLeft 
-                            size="12" 
-                            :color="btnCancelColor" />
-                    </template>
-                </NudeButton>
+                <button
+                    type="button"
+                    @click="handleOnCancel"
+                    >
+                    <ArrowLeft 
+                        size="10"
+                    />
+                    <p class="return-text">Cancel</p>
+                </button>
             </section>
             <header>
                 <p id="title">Delete {{ textTitle }} item?</p>
@@ -57,10 +54,10 @@ import { ref } from 'vue';
 
 // Components
 import PrimaryButton from '../Buttons/PrimaryButton.vue';
-import NudeButton from '../Buttons/NudeButton.vue';
 
 // Modules
 import deleteProduct from '@/modules/product/deleteProduct';
+import deleteInventoryItem from '@/modules/inventory/deleteInventoryItem';
 
 // Variables for initialisations
 /**
@@ -77,11 +74,11 @@ const props = defineProps({
         type: String,
         default: 'A description for the delete modal.'
     },
-    itemID: {
-        type: Number,
+    itemValues: {
+        type: Object
     },
-    itemName: {
-        type: String,
+    itemType: {
+        type: String
     },
     items: {
         type: Array,
@@ -94,7 +91,6 @@ const emits = defineEmits([
     'onConfirm'
 ])
 
-const btnCancelColor = ref('#505050b0')
 const btnAddIconColor = ref('#FFFAFA');
 
 function changeButtonAddIconColor() {
@@ -106,12 +102,23 @@ function handleOnCancel() {
 };
 
 async function handleOnConfirm() {
-    const { error, onDelete } = deleteProduct(props.itemID);
+    const deleteModules = {
+        product: deleteProduct,
+        inventory: deleteInventoryItem
+    };
+
+    const searchItemID = {
+        product: props.itemValues.id
+    };
+
+    const deleteModule = deleteModules[props.itemType];
+    const itemID = searchItemID[props.itemType];
+    const { error, onDelete } = deleteModule(itemID);
 
     await onDelete();
 
     if (error.value === null) {
-        emits('onConfirm', props.itemName);
+        emits('onConfirm', props.itemValues);
     } else {
         // add a catcher if possible
     };

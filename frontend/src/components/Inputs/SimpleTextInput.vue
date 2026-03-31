@@ -32,7 +32,7 @@
 
 
 // Vue
-import { onMounted, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 
 // Variables for inits
 /**

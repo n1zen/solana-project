@@ -19,11 +19,8 @@ const updateInventoryItem = (inventoryItem) => {
                     : data.detail.map(e => e.msg).join(', ');
                 throw Error(message);
             }
-
-            // alert('Product edited successfully');
         } catch (err) {
             error.value = err.message;
-            // alert(error.value);
             console.error(err.message);
         }
     }

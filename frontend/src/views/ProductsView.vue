@@ -15,7 +15,7 @@
                         :model-values="modalModelValues"
                         :modal-type="modalType"
                         :itemType="0"
-                        :row-i-d-for-edit="activeTableRow"
+                        :item-i-d-for-edit="editItemID"
                         @on-cancel="reinitializeModalVariables"
                         @on-submit="handleSubmitFromModal"
                     />
@@ -51,9 +51,10 @@
                         v-else-if="modalType === 'delete'"
                         text-title="product"
                         desc="This action will permanently delete this product."
-                        :item-i-d="deleteRowItemID"
-                        :item-name="deleteItemName"
+                        :item-values="deleteItemValues"
                         :items="deleteTableValues"
+                        item-type="product"
+                        @on-cancel="reinitializeModalVariables"
                         @on-confirm="handleSubmitFromModal"
                     />
                 </transition>
@@ -84,8 +85,9 @@
             <SimpleTable 
                 table-i-d="product"
                 :legends="legends"
-                :rows="rows"
+                :rows="products"
                 :table-state="tableState"
+                item-type="product"
                 table-state-text="Product list"
                 @on-row-edit="handleTableRowEdit"
                 @on-row-delete="handleTableRowDelete"
@@ -100,7 +102,7 @@
 import { FilePen, PackageCheck, PackagePlus, PackageX, Plus } from 'lucide-vue-next';
 
 // Vue
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
 // Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
@@ -115,7 +117,6 @@ import DeleteModal from '@/components/Modals/DeleteModal.vue';
 
 // Variables for inits
 const { products, error, load } = getAllProducts(); 
-const productData = ref(null);
 const legends = [
     { id: 'skuid', text: 'SKU ID' },
     { id: 'name', text: 'Product Name' },
@@ -123,7 +124,6 @@ const legends = [
     { id: 'price', text: 'Price' },
     { id: 'actions', text: 'Actions' },
 ];
-const rows = ref([]); // Used for table rows
 // Do see the SimpleAddEditModal.vue for field object
 const modalAddEditFields = [ // Change this later to inventory
     { id: 1, type: 'text',  hintText: 'SKU ID*' },
@@ -131,6 +131,7 @@ const modalAddEditFields = [ // Change this later to inventory
     { id: 3, type: 'dropdowntext',  hintText: 'Category*' },
     { id: 4, type: 'text',  hintText: 'Price*' },
 ];
+    
 
 // Variables for Child
 const messageIcon = ref(null); // addIcon, editIcon, deleteIcon, messageIcon
@@ -139,14 +140,14 @@ const isOverlayCalled = ref(false);
 const activeTableRow = ref(null);
 const tableState = ref('loading'); // default this to loading
 const successfulMessage = ref('');
-const deleteRowItemID = ref(null);
-const deleteItemName = ref(null);
-const modalModelValues = ref([
-    { id: 1, value: '' },
-    { id: 2, value: '' },
-    { id: 3, value: '' },
-    { id: 4, value: '' },
-]);
+const editItemID = ref(null);
+const deleteItemValues = ref({});
+const modalModelValues = reactive({
+    sku: '',
+    name: '',
+    category: '',
+    price: '',
+});
 const deleteTableValues = ref([
     { legend: 'SKUID', value: '' },
     { legend: 'Product Name', value: '' },
@@ -155,7 +156,7 @@ const deleteTableValues = ref([
 ]);
 
 // Load data after mount
-onMounted(async () => {
+onMounted(() => {
     loadItems();
 });
 
@@ -172,11 +173,9 @@ function reinitializeModalVariables() {
     successfulMessage.value = '';
     modalType.value = null;
     messageIcon.value = null;
-    deleteRowItemID.value = null;
-    deleteItemName.value = null;
 
-    modalModelValues.value.forEach(item => {
-        item.value = '';
+    Object.keys(modalModelValues).forEach(key => {
+        modalModelValues[key] = '';
     });
 
     deleteTableValues.value.forEach(item => {
@@ -193,51 +192,65 @@ function handleNewItemRequest() {
 };
 
 // Opens the modal for edit
-function handleTableRowEdit(rowID) {
-    const row = rows.value[rowID];
+function handleTableRowEdit(rowIndex) {
+    const product = products.value[rowIndex];
     
-    activeTableRow.value = rowID;
+    activeTableRow.value = rowIndex;
     isOverlayCalled.value = true;
     modalType.value = 'edit';
+    editItemID.value = product.id;
 
-    modalModelValues.value.forEach((item, index) => {
-        item.value = row[index];
-    });
+    modalModelValues.sku = product.sku;
+    modalModelValues.name = product.name;
+    modalModelValues.category = product.category;
+    modalModelValues.price = product.price;
 
-    console.log(modalModelValues.value);
+    console.log(modalModelValues);
+
+    // use for debug
+    // console.log('==============')
+    // console.log('modalModelValues: ');
+    // console.log(modalModelValues.value);
 };
 
 // Opens the modal for delete
-function handleTableRowDelete(rowItemID, rowIndex) {
-    const row = rows.value[rowIndex];
-    console.log(rowItemID);
+function handleTableRowDelete(rowIndex) {
+    const product = products.value[rowIndex];
+    console.log(products.value);
     
-    deleteRowItemID.value = rowItemID;
+    deleteItemValues.value = product;
     activeTableRow.value = rowIndex;
     isOverlayCalled.value = true;
     modalType.value = 'delete';
+
+    const productValues = [
+        product.sku,
+        product.name,
+        product.category,
+        product.price,
+    ]
     
     deleteTableValues.value.forEach((item, index) => {
-        item.value = row[index];
+        item.value = productValues[index];
     });
-
-    deleteItemName.value = deleteTableValues.value[1].value;
 };
 
 // Handle successful add/edit submission from modal
-async function handleSubmitFromModal(item, hasNoChangesOnEdit = false) {
+function handleSubmitFromModal(submittedValues, hasNoChangesOnEdit = false) {
+    const item = submittedValues.name;
+
     const messageTemplates = {
-        add: `${ item.name } has been added successfully!`,
-        edit: `${ item.name } has been updated successfully!`,
+        add: `${ item } has been added successfully!`,
+        edit: `${ item } has been updated successfully!`,
         delete: `${ item } has been removed successfully!`,
     };
 
     if (hasNoChangesOnEdit) messageIcon.value = 'noChangesIcon';
     else messageIcon.value = `${ modalType.value }Icon`;
 
-    rows.value = [];
     successfulMessage.value = messageTemplates[modalType.value];
     modalType.value = 'message';
+    products.value = [];
 
     loadItems();
 };
@@ -247,42 +260,12 @@ async function loadItems() {
     tableState.value = 'loading';
 
     await load();
+    console.log(products.value);
         
     if (error.value === null) {
-        // Change all this later
-        productData.value = products.value;
-        // use for debug
-        // console.log('==============')
-        // console.log('productData: ');
-        // console.log(productData.value);
-
-        // Iterates over the given array
-        productData.value.forEach(data => {
-            let newItem = [];
-
-            /*
-            * Get all values from the data
-            * value here refers to the data
-            * from the server. For example:
-            * for products, we have price
-            * and value gives the value of price
-            * say 150.
-            */
-            Object.values(data).forEach(value => {
-                newItem.push(value);
-            });
-
-            rows.value.push(newItem); // Add values as rows
-        });
-
-        const rowsLength = rows.value.length
+        const productLength = products.value.length
         
-        tableState.value = rowsLength === 0 ? 'empty' : 'exist';
-
-        // use for debug
-        // console.log('==============')
-        // console.log('Rows: ');
-        // console.log(rows.value); 
+        tableState.value = productLength === 0 ? 'empty' : 'exist';
     } else {
         tableState.value = 'empty';
     };

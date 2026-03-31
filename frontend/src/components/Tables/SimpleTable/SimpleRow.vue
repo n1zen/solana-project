@@ -5,10 +5,14 @@
         @click="handleOnClick">
         <td 
             class="column-data"
-            v-for="(datum, index) in data"
+            v-for="(value, key, index) in rowTemplate"
             :key="index"
             >
-            <span v-if="index !== data.length - 1">{{ datum }}</span>
+            <span 
+                v-if="index !== Object.keys(rowTemplate).length - 1"
+                >
+                {{ value }}
+            </span>
             <div
                 class="actions" 
                 v-else
@@ -38,6 +42,9 @@
 <script setup>
 // Imports outside
 import { SquarePen, SquareX } from 'lucide-vue-next';
+import { reactive, ref } from 'vue';
+
+// Vue
 
 // Variables for inits
 /**
@@ -45,12 +52,15 @@ import { SquarePen, SquareX } from 'lucide-vue-next';
  * but basically, it is datum of the row
  */
 const props= defineProps({
-    index: {
+    rowIndex: {
         type: Number,
     },
     data: {
-        type: Array,
-        default: []
+        type: Object,
+        default: {}
+    },
+    itemType: {
+        type: String,
     },
     isCurrentlyClicked: {
         type: Boolean,
@@ -64,21 +74,54 @@ const emits = defineEmits([
     'onDelete'
 ])
 
+const rowTemplate = ref(null);
+
+const productDataRowTemplate = reactive({
+    sku: '',
+    name: '',
+    category: '',
+    price: '',
+    id: ''
+});
+
+const inventoryDataRowTemplate = reactive({
+    productid: '',
+    productname: '',
+    quantity: '',
+    id: ''
+});
+
+if (props.itemType === 'product') {
+    const datum = props.data;
+    
+    Object.keys(productDataRowTemplate).forEach(key => {
+        productDataRowTemplate[key] = datum[key];
+    });
+
+    rowTemplate.value = productDataRowTemplate;
+} else if (props.itemType === 'inventory') {
+    const datum = props.data;
+    const productData = datum?.product;
+    
+    inventoryDataRowTemplate.productid = productData?.sku;
+    inventoryDataRowTemplate.productname = productData?.name;
+    inventoryDataRowTemplate.quantity = datum.quantity;
+    inventoryDataRowTemplate.id = datum.id;
+
+    rowTemplate.value = inventoryDataRowTemplate;
+};
+
 // Function Handlers
 function handleOnClick() {
-    console.log(props.data);
-    emits('onClick', props.index);
+    emits('onClick', props.rowIndex);
 };
 
 function handleOnEdit() {
-    emits('onEdit', props.index);
+    emits('onEdit', props.rowIndex);
 };
 
 function handleOnDelete() {
-    const length = props.data.length - 1;
-    const itemID = props.data[length];
-
-    emits('onDelete', itemID, props.index);
+    emits('onDelete', props.rowIndex);
 };
 </script>
 

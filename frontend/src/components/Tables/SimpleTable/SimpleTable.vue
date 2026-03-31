@@ -59,7 +59,8 @@
                     v-for="(row, index) in rows"
                     :key="index"
                     :data="row"
-                    :index="index"
+                    :rowIndex="index"
+                    :item-type="itemType"
                     :is-currently-clicked="activeRowIndex === index"
                     @on-click="handleClickFromSimpleRow"
                     @on-edit="handleEditRequestFromRow"
@@ -86,11 +87,6 @@ import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
  * [ { id: String, text: String } ]
  * i.e. id: 'name', text: 'Product Name'
  * 
- * Template for 'props.rows'
- * [ [ data1, data2 ], [ data1, data2 ] ]
- * +++ The main array contains the rows
- * +++ The second array contains the data
- * 
  * tableState accepts 'loading', 'empty', 'exist'
  */
 const props = defineProps({
@@ -105,6 +101,9 @@ const props = defineProps({
     rows: {
         type: Array,
         default: []
+    },
+    itemType: {
+        type: String,
     },
     tableState: {
         type: String

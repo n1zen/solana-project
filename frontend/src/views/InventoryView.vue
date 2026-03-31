@@ -49,6 +49,14 @@
                     </MessageModal>
                     <DeleteModal 
                         v-else-if="modalType === 'delete'"
+                        text-title="inventory"
+                        desc="This action will permanently delete this item."
+                        :item-i-d="deleteRowItemID"
+                        :item-name="deleteItemName"
+                        :items="deleteTableValues"
+                        item-type="inventory"
+                        @on-cancel="reinitializeModalVariables"
+                        @on-confirm="handleSubmitFromModal"
                     />
                 </transition>
             </template>
@@ -78,11 +86,12 @@
             <SimpleTable 
                 table-i-d="inventory"
                 :legends="legends"
-                :rows="rows"
+                :rows="inventory"
                 :table-state="tableState"
+                item-type="inventory"
                 table-state-text="Inventory"
                 @on-row-edit="handleTableRowEdit"
-                @on-row-delete=""
+                @on-row-delete="handleTableRowDelete"
                 @on-empty-add="handleNewItemRequest"
             />
         </div>
@@ -94,7 +103,7 @@
 import { FilePen, PackageCheck, PackagePlus, PackageX, Plus } from 'lucide-vue-next';
 
 // Vue
-import { onMounted, ref } from 'vue';
+import { onMounted, reactive, ref } from 'vue';
 
 // Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
@@ -109,20 +118,17 @@ import getAllInventory from '@/modules/inventory/getAllInventory';
 
 // Variables for inits
 const { inventory, error, load } = getAllInventory();
-const inventoryData = ref(null);
 const legends = [
-    { id: 'skuid', text: 'SKU ID' },
+    { id: 'product-id', text: 'Product SKU' },
     { id: 'name', text: 'Product Name' },
-    { id: 'category', text: 'Category' },
-    { id: 'price', text: 'Price' },
+    { id: 'quantity', text: 'Quantity' },
     { id: 'actions', text: 'Actions' },
 ];
-const rows = ref([]); // Used for table rows
 // Do see the SimpleAddEditModal.vue for field object
 const modalAddEditFields = [ // Change this later to inventory
-    { id: 1, type: 'text',  hintText: 'Product ID' },
-    { id: 2, type: 'text',  hintText: 'Description' },
-    { id: 3, type: 'text',  hintText: 'Quantity' },
+    { id: 1, type: 'dropdowntext',  hintText: 'Product SKU' },
+    { id: 3, type: 'text',  hintText: 'Description' },
+    { id: 4, type: 'text',  hintText: 'Quantity' },
 ];
 
 // Variables for Child
@@ -131,12 +137,18 @@ const modalType = ref(null); // add, edit, delete, message
 const isOverlayCalled = ref(false);
 const activeTableRow = ref(null);
 const successfulMessage = ref('');
+const deleteRowItemID = ref(null);
+const deleteItemName = ref(null);
 const tableState = ref('loading'); // default this to null
-const modalModelValues = ref([
-    { id: 1, value: '' },
-    { id: 2, value: '' },
-    { id: 3, value: '' },
-    { id: 4, value: '' },
+const modalModelValues = reactive({
+    product_id: '',
+    details: '',
+    quantity: '',
+});
+const deleteTableValues = ref([
+    { legend: 'Product SKU', value: '' },
+    { legend: 'Product Name', value: '' },
+    { legend: 'Quantity', value: '' }
 ]);
 
 // Load data after mount
@@ -153,13 +165,13 @@ function changeButtonAddIconColor() {
 };
 
 function reinitializeModalVariables() {
-    modalType.value = null;
     isOverlayCalled.value = false;
     successfulMessage.value = '';
+    modalType.value = null;
     messageIcon.value = null;
 
-    modalModelValues.value.forEach(item => {
-        item.value = '';
+    Object.keys(modalModelValues).forEach(key => {
+        modalModelValues[key] = '';
     });
 };
 
@@ -172,38 +184,60 @@ function handleNewItemRequest() {
 };
 
 // Opens the modal for edit
-function handleTableRowEdit(rowID) {
-    const row = rows.value[rowID];
+function handleTableRowEdit(rowIndex) {
+    const inventoryItem = inventory.value[rowIndex];
     
-    activeTableRow.value = rowID;
+    activeTableRow.value = rowIndex;
     isOverlayCalled.value = true;
     modalType.value = 'edit';
+
+    modalModelValues.product_id = inventoryItem.product?.sku;
+    modalModelValues.details = inventoryItem.details;
+    modalModelValues.quantity = inventoryItem.quantity;
     
-    modalModelValues.value.forEach((item, index) => {
-        item.value = row[index];
-    });
+    // use for debug
+    // console.log('==============')
+    // console.log('modalModelValues: ');
+    // console.log(modalModelValues.value);
 };
 
-function handleTableRowDelete(rowID) {
-    const row = rows.value[rowID];
-
-    activeTableRow.value = rowID;
+function handleTableRowDelete(rowItemID, rowIndex) {
+    const inventoryItem = inventory.value[rowIndex];
+    
+    deleteRowItemID.value = rowItemID;
+    activeTableRow.value = rowIndex;
     isOverlayCalled.value = true;
     modalType.value = 'delete';
+
+    const itemValues = [
+        inventoryItem.id,
+        inventoryItem.product?.name,
+        inventoryItem.quantity,
+    ]
+    
+    deleteTableValues.value.forEach((item, index) => {
+        item.value = itemValues[index];
+    });
+
+    deleteItemName.value = itemValues[1];
 };
 
 // Handle successful add/edit submission from modal
-async function handleSubmitFromModal(item, hasNoChangesOnEdit) {
+async function handleSubmitFromModal(hasNoChangesOnEdit = false) {
+    const item = inventory.value[activeTableRow.value];
+    const itemName = item.product?.name
+
     const messageTemplates = {
-        add: `${ item.name } has been added successfully!`,
-        edit: `${ item.name } has been updated successfully!`,
-        delete: `${ item.name } has been removed successfully!`,
+        add: `${ itemName } has been added successfully!`,
+        edit: `${ itemName } has been updated successfully!`,
+        delete: `${ itemName } has been removed successfully!`,
     };
+
+    console.log(item);
 
     if (hasNoChangesOnEdit) messageIcon.value = 'noChangesIcon';
     else messageIcon.value = `${ modalType.value }Icon`;
 
-    rows.value = [];
     successfulMessage.value = messageTemplates[modalType.value];
     modalType.value = 'message';
 
@@ -215,42 +249,11 @@ async function loadItems() {
     tableState.value = 'loading';
 
     await load();
-        
+
     if (error.value === null) {
-        // Change all this later
-        inventoryData.value = inventory.value;
-        // use for debug
-        // console.log('==============')
-        // console.log('inventoryData: ');
-        // console.log(inventoryData.value);
-
-        // Iterates over the given array
-        inventoryData.value.forEach(data => {
-            let newItem = [];
-
-            /*
-            * Get all values from the data
-            * value here refers to the data
-            * from the server. For example:
-            * for inventory, we have quantity
-            * and value gives the value of quantity
-            * say 5.
-            */
-            Object.values(data).forEach(value => {
-                newItem.push(value);
-            });
-
-            rows.value.push(newItem); // Add values as rows
-        });
-
-        const rowsLength = rows.value.length
-
-        tableState.value = rowsLength === 0 ? 'empty' : 'exist';
-
-        // use for debug
-        // console.log('==============')
-        // console.log('inventoryData: ');
-        // console.log(rows.value); 
+        const inventoryLength = inventory.value.length
+        
+        tableState.value = inventoryLength === 0 ? 'empty' : 'exist';
     } else {
         tableState.value = 'empty';
     };
