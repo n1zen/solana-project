@@ -151,7 +151,7 @@ const props = defineProps({
 
 const emits = defineEmits([
     'onCancel',
-    // 'onSubmit'
+    'onSubmit'
 ]);
 
 const inputData = ref([]);
@@ -159,7 +159,10 @@ const hasMissingInput = ref(false);
 
 // Initialise inputData
 props.modelValues?.forEach(item => {
-    console.log(item); // use for debug
+    //use for debug
+    // console.log('==============')
+    // console.log('item: ');
+    console.log(item);
     let newInputData = {
         id: item.id,
         value: item.value,
@@ -167,7 +170,10 @@ props.modelValues?.forEach(item => {
     };
 
     inputData.value.push(newInputData);
-    console.log(inputData.value); // use for debug
+    //use for debug
+    // console.log('==============')
+    // console.log('inputData: ');
+    // console.log(inputData.value); 
 });
 
 
@@ -233,29 +239,35 @@ async function handleOnSubmit() {
         itemTemplate[key] = inputData.value[index].value;
     });
     
-    const id = props.rowIDForEdit + 1 // The plus one here is for the server
-
-    if (id) Object.assign(itemTemplate, { id });
+    if (props.rowIDForEdit) {
+        const id = props.rowIDForEdit + 1 // The plus one here is for the server
+    
+        Object.assign(itemTemplate, { id });
+    };
 
     const modules = addEditTypes[props.itemType];
     const action = props.modalType === 'add' ? modules.add : modules.edit
     const { error, onSubmit } = action(itemTemplate);
 
-    // await onSubmit();
+    await onSubmit();
 
-    // if (error.value === null) {
-
-    // } else {
-
-    // };
+    if (error.value === null) {
+        emits('onSubmit', itemTemplate);
+        // use for debug
+        // console.log('==============')
+        // console.log('itemTemplate: ');
+        // console.log(itemTemplate);
+    } else {
+        handleExistingInput(error.value);
+    };
 };
 
 function handleMissingInput() {
 
 };
 
-function handleExistingInput() {
-
+function handleExistingInput(error) {
+    console.log(error);
 };
 </script>
 

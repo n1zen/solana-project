@@ -1,73 +1,66 @@
 <template>
-    <div class="page" id="page-products">
-        <transition name="fade">
-            <Overlay 
-                v-if="isModalOpen"
-                @on-click="reinitalize"
+    <transition name="fade">
+        <Overlay
+            v-if="isOverlayCalled"
+            @on-click="reinitializeModalVariables"
             >
-                <template #sSurface>
-                    <transition name="fade" mode="out-in">
-                        <ProductCRUDModal 
-                            v-if="requestedModal === 'update' || requestedModal === 'add'"
-                            key="crud"
-                            @on-cancel="reinitalize"
-                            @on-submit="handleSubmit"
-                            :is-edit="requestedModal === 'update'"
-                            :product-item="productItemInfo"
-                        />
-                        <DeleteModal 
-                            v-else-if="requestedModal === 'delete'"
-                            key="delete"
-                            textTitle="product"
-                            desc="This action will permanently delete this product."
-                            :items="itemToDelete"
-                            @on-cancel="reinitalize"
-                            @on-confirm="handleConfirmedDelete"
-                        />
-                        <MessageModal
-                            v-else
-                            key="message"
-                            :message="messageModalInfo.message"
-                            :message-text-color="messageModalInfo.messageTextColor"
-                            :icon-border-color="messageModalInfo.iconBorderColor"
-                            @on-confirm="reinitalize"
-                        >      
-                            <template #sMessageIcon>
-                                <PackagePlus 
-                                    v-if="messageModalInfo.iconType === 'add'"
-                                    size="60"
-                                    color="var(--color-valid)"
+            <template #sSurface>
+                <transition name="fade" mode="out-in">
+                    <SimpleAddEditModal 
+                        v-if="
+                        modalType === 'add' ||
+                        modalType === 'edit'
+                        "
+                        :fields="modalAddEditFields"
+                        :model-values="modalModelValues"
+                        :modal-type="modalType"
+                        :itemType="0"
+                        :row-i-d-for-edit="activeTableRow"
+                        @on-cancel="reinitializeModalVariables"
+                        @on-submit="handleSubmitFromModal"
+                    />
+                    <MessageModal 
+                        v-else-if="modalType === 'message'"
+                        :message="successfulMessage"
+                        >
+                        <template #sMessageIcon>
+                            <PackagePlus 
+                                v-if="messageIcon === 'addIcon'"
+                                size="60"
+                                color="var(--color-valid)"
                                 />
-                                <PackageCheck 
-                                    v-else-if="messageModalInfo.iconType === 'update'"
-                                    size="60"
-                                    color="var(--color-valid)"
+                            <PackageCheck 
+                                v-if="messageIcon === 'editIcon'"
+                                size="60"
+                                color="var(--color-valid)"
                                 />
-                                <PackageX 
-                                    v-else-if="messageModalInfo.iconType === 'delete'"
-                                    size="60"
-                                    color="var(--color-valid)"
+                            <PackageX 
+                                v-if="messageIcon === 'deleteIcon'"
+                                size="60"
+                                color="var(--color-valid)"
                                 />
-                                <FilePen 
-                                    v-else
-                                    size="60"
-                                    color="var(--color-valid)"
-                                />
-                            </template>
-                        </MessageModal>
-                    </transition>
-                </template>
-            </Overlay>
-        </transition>
+                            <FilePen 
+                                v-if="messageIcon === 'noChangesIcon'"
+                                size="60"
+                                color="var(--color-valid)"
+                            />
+                        </template>
+                    </MessageModal>
+                </transition>
+            </template>
+        </Overlay>
+    </transition>
+    <div class="page" id="page-products">
         <div id="products">
             <section id="header">
                 <h1>Product List</h1>
                 <div id="actions">
                     <PrimaryButton 
-                        :text="'New Product'" 
+                        text="New Product" 
+                        :has-icon="true"
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
-                        @on-click="handleAddRequest"
+                        @on-click="handleNewItemRequest"
                     >
                         <template #sIcon>
                              <Plus 
@@ -78,180 +71,165 @@
                     </PrimaryButton>
                 </div>
             </section>
-            <ProductTable 
-                :product-list="productList"
-                @edit-item-request="handleEditRequest"
-                @delete-item-request="handleDeleteRequest"   
+            <SimpleTable 
+                table-i-d="product"
+                :legends="legends"
+                :rows="rows"
+                @on-row-edit="handleTableRowEdit"
             />
         </div>
     </div>
 </template>
 
 <script setup>
-import { FilePen, Plus, PackagePlus, PackageCheck, PackageX } from 'lucide-vue-next';
+// Imports outside
+import { FilePen, PackageCheck, PackagePlus, PackageX, Plus } from 'lucide-vue-next';
 
-import { onMounted, reactive, ref } from 'vue';
+// Vue
+import { onMounted, ref } from 'vue';
 
-import getAllProducts from '@/modules/product/getAllProducts';
-import deleteProduct from '@/modules/product/deleteProduct';
-
-import ProductTable from '@/components/Tables/ProductTable/ProductTable.vue';
+// Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
-import ProductCRUDModal from '@/components/Modals/ProductCRUDModal.vue';
+import SimpleTable from '@/components/Tables/SimpleTable/SimpleTable.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
-import DeleteModal from '@/components/Modals/DeleteModal.vue';
+import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
+
+// Modules
+import getAllProducts from '@/modules/product/getAllProducts';
 import MessageModal from '@/components/Modals/MessageModal.vue';
 
-const btnAddIconColor = ref("#FFFAFA");
-const isModalOpen = ref(false);
-const requestedModal = ref('');
-const productList = ref([]);
-const productItemInfo = ref({});
-const itemToDelete = ref([]);
-const messageModalInfo = reactive({ 
-    message: '', 
-    messageTextColor: '', 
-    iconBorderColor: '',
-    iconType: ''
-});
+// Variables for inits
+const { products, error, load } = getAllProducts(); 
+const productData = ref(null);
+const legends = [
+    { id: 'skuid', text: 'SKU ID' },
+    { id: 'name', text: 'Product Name' },
+    { id: 'category', text: 'Category' },
+    { id: 'price', text: 'Price' },
+    { id: 'actions', text: 'Actions' },
+];
+const rows = ref([]); // Used for table rows
+// Do see the SimpleAddEditModal.vue for field object
+const modalAddEditFields = [ // Change this later to inventory
+    { id: 1, type: 'text',  hintText: 'SKU ID*' },
+    { id: 2, type: 'text',  hintText: 'Product Name*' },
+    { id: 3, type: 'dropdowntext',  hintText: 'Category*' },
+    { id: 4, type: 'text',  hintText: 'Price*' },
+];
 
-const { products, error, load } = getAllProducts();
+// Variables for Child
+const messageIcon = ref(null); // addIcon, editIcon, deleteIcon, messageIcon
+const modalType = ref(null); // add, edit, delete, message
+const isOverlayCalled = ref(false);
+const activeTableRow = ref(null);
+const successfulMessage = ref('');
+const modalModelValues = ref([
+    { id: 1, value: '' },
+    { id: 2, value: '' },
+    { id: 3, value: '' },
+    { id: 4, value: '' },
+]);
 
-// Get products from the server
+// Load data after mount
 onMounted(async () => {
-    await load();
-
-    if (error.value === null) {
-        productList.value = products.value;
-    };
+    loadItems();
 });
 
+// Variables for children
+const btnAddIconColor = ref("#FFFAFA");
+
+// Function Appearances
 function changeButtonAddIconColor() {
     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
 };
 
-// Renders the modal
-function renderOverlay(state) {
-    isModalOpen.value = state;
+function reinitializeModalVariables() {
+    modalType.value = null;
+    isOverlayCalled.value = false;
+    successfulMessage.value = '';
+    messageIcon.value = null;
+
+    modalModelValues.value.forEach(item => {
+        item.value = '';
+    });
 };
 
-function handleAddRequest() {
-    requestedModal.value = 'add';
-
-    renderOverlay(true);
+// Function Handlers
+// Opens the modal for edit
+function handleNewItemRequest() {
+    isOverlayCalled.value = true;
+    modalType.value = 'add'
+    activeTableRow.value = null;
 };
 
-function handleEditRequest(request) {
-    for(let iter = 0; iter < productList.value.length; iter++) {
-        if (productList.value[iter].id === request.itemID) {
-            productItemInfo.value = productList.value[iter];
-            break;
-        };
-    };
+// Opens the modal for edit
+function handleTableRowEdit(rowID) {
+    const row = rows.value[rowID];
     
-    requestedModal.value = request.type;
-    renderOverlay(true);
-};
+    activeTableRow.value = rowID;
+    isOverlayCalled.value = true;
+    modalType.value = 'edit';
 
-function handleDeleteRequest(request) {
-    for(let iter = 0; iter < productList.value.length; iter++) {
-        if (productList.value[iter].id === request.itemID) {
-            productItemInfo.value = productList.value[iter];
-            break;
-        };
-    };
-
-    const itemData = [
-        { type: 'SKU ID', data: productItemInfo.value.sku },
-        { type: 'Product name', data: productItemInfo.value.name },
-        { type: 'Category', data: productItemInfo.value.category },
-        { type: 'Price', data: productItemInfo.value.price }
-    ]
-
-    requestedModal.value = request.type;
-    itemToDelete.value = itemData;
-    renderOverlay(true);
-};
-
-function reinitalize(overlayState) {
-    productItemInfo.value = [];
-    itemToDelete.value = [];
-    requestedModal.value = ''
-
-    renderOverlay(overlayState);
-};
-
-function showMessageModal({ message, iconType, color = 'var(--color-valid)' }) {
-    messageModalInfo.message = message;
-    messageModalInfo.messageTextColor = color;
-    messageModalInfo.iconBorderColor = color;
-    messageModalInfo.iconType = iconType;
-
-    requestedModal.value = 'message';
-};
-
-function updateProduct(product) {
-    const targetProduct = productList.value[product.id - 1];
-
-    if (!targetProduct) return;
-
-    Object.assign(targetProduct, {
-        sku: product.sku,
-        name: product.name,
-        category: product.category,
-        price: product.price
+    modalModelValues.value.forEach((item, index) => {
+        item.value = row[index];
     });
 };
 
-function handleSubmit({ responseType, item }) {
-    if (responseType === 'add') {
-        item.id = productList.value.length + 1;
-        productList.value.push(item);
-
-        showMessageModal({
-            message: 'Product added successfully!',
-            iconType: 'add'
-        });
-
-        return;
+// Handle successful add/edit submission from modal
+async function handleSubmitFromModal(item, hasNoChangesOnEdit) {
+    const messageTemplates = {
+        add: `${ item.name } has been added successfully!`,
+        edit: `${ item.name } has been updated successfully!`,
+        delete: `${ item.name } has been removed successfully!`,
     };
 
-    if (responseType === 'updated') {
-        updateProduct(item);
+    if (hasNoChangesOnEdit) messageIcon.value = 'noChangesIcon';
+    else messageIcon.value = `${ modalType.value }Icon`;
 
-        showMessageModal({
-            message: 'Product updated successfully!',
-            iconType: 'update'
-        });
+    rows.value = [];
+    successfulMessage.value = messageTemplates[modalType.value];
+    modalType.value = 'message';
 
-        return;
-    };
-
-    showMessageModal({
-        message: 'No changes occurred...',
-        iconType: 'nochange'
-    });
+    loadItems();
 };
 
-async function handleConfirmedDelete() {
-    const itemID = productItemInfo.value.id
-    const { error, onDelete } = deleteProduct(itemID);
-
-    await onDelete();
-
+// Function reusables
+async function loadItems() {
+    await load();
+        
     if (error.value === null) {
-        for(let iter = 0; iter < productList.value.length; iter++) {
-            if (productList.value[iter].id === itemID) {
-                productList.value.splice(iter, 1);
-                break;
-            };
-        };
+        // Change all this later
+        productData.value = products.value;
+        // use for debug
+        // console.log('==============')
+        // console.log('productData: ');
+        // console.log(productData.value);
 
-        messageModalInfo.message = 'Product deleted successfully!';
-        messageModalInfo.messageTextColor = 'var(--color-valid)';
-        messageModalInfo.iconBorderColor = 'var(--color-valid)';
-        messageModalInfo.iconType = 'delete'
-        requestedModal.value = 'message'
+        // Iterates over the given array
+        productData.value.forEach(data => {
+            let newItem = [];
+
+            /*
+            * Get all values from the data
+            * value here refers to the data
+            * from the server. For example:
+            * for products, we have price
+            * and value gives the value of price
+            * say 150.
+            */
+            Object.values(data).forEach(value => {
+                newItem.push(value);
+            });
+
+            rows.value.push(newItem); // Add values as rows
+        });
+
+        // use for debug
+        // console.log('==============')
+        // console.log('productData: ');
+        // console.log(rows.value); 
+    } else {
+        // If possible, add a catcher
     };
 };
 </script>
@@ -262,24 +240,5 @@ async function handleConfirmedDelete() {
     position: relative;
 }
 
-#header {
-    margin-bottom: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-#header h1 {
-    color: var(--color-secondary);
-}
-
-.fade-enter-active,
-.fade-leave-active {
-  transition: opacity 0.3s ease;
-}
-
-.fade-enter-from,
-.fade-leave-to {
-  opacity: 0;
-}
+@import '../styles/shared-views/views.css';
 </style>
