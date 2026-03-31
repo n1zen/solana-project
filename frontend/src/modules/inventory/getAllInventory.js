@@ -1,16 +1,16 @@
-// fetch all inventory from local backend server
+// fetch all inventory
 import { ref } from 'vue';
 
-const getAllProducts = () => {
+const getAllInventory = () => {
 
     const inventory = ref([]);
     const error = ref(null);
 
     const load = async () => {
         try {
-            let response = await fetch('http://localhost:8000/api/inventory/');
+            let response = await fetch(`http://localhost:8000/api/inventory`);
             if (!response.ok) {
-                throw Error('No product available')
+                throw Error('No inventory items available')
             }
             inventory.value = await response.json();
         } catch (err) {
@@ -22,4 +22,4 @@ const getAllProducts = () => {
     return { inventory, error, load };
 }
 
-export default getAllProducts;
+export default getAllInventory;
