@@ -102,6 +102,7 @@ import SimpleTable from '@/components/Tables/SimpleTable/SimpleTable.vue';
 import Overlay from '@/components/Modals/Overlay.vue';
 import MessageModal from '@/components/Modals/MessageModal.vue';
 import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
+import DeleteModal from '@/components/Modals/DeleteModal.vue';
 
 // Modules
 import getAllInventory from '@/modules/inventory/getAllInventory';

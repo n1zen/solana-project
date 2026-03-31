@@ -8,7 +8,7 @@ const getAllInventory = () => {
 
     const load = async () => {
         try {
-            let response = await fetch(`http://localhost:8000/api/inventory`);
+            let response = await fetch(`http://localhost:8000/api/inventory/`);
             if (!response.ok) {
                 throw Error('No inventory items available')
             }

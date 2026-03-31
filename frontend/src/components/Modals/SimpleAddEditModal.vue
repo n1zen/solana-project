@@ -88,7 +88,7 @@ import { ref } from 'vue';
 // Modules
 import addProduct from '@/modules/product/addProduct';
 import updateProduct from '@/modules/product/updateProduct';
-import addInventoryItem from '@/modules/inventory/addInventory';
+import addInventoryItem from '@/modules/inventory/addInventoryItem';
 
 // Components
 import SimpleTextInput from '../Inputs/SimpleTextInput.vue';
