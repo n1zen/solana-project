@@ -14,7 +14,7 @@
                         :fields="modalAddEditFields"
                         :model-values="modalModelValues"
                         :modal-type="modalType"
-                        :itemType="0"
+                        :itemType="1"
                         :row-i-d-for-edit="activeTableRow"
                         @on-cancel="reinitializeModalVariables"
                         @on-submit="handleSubmitFromModal"
@@ -75,7 +75,10 @@
                 table-i-d="inventory"
                 :legends="legends"
                 :rows="rows"
+                :table-state="tableState"
+                table-state-text="Inventory"
                 @on-row-edit="handleTableRowEdit"
+                @on-empty-add="handleNewItemRequest"
             />
         </div>
     </div>
@@ -95,11 +98,11 @@ import Overlay from '@/components/Modals/Overlay.vue';
 import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
 
 // Modules
-import getAllProducts from '@/modules/product/getAllProducts';
+import getAllInventory from '@/modules/inventory/getAllInventory';
 import MessageModal from '@/components/Modals/MessageModal.vue';
 
 // Variables for inits
-const { products, error, load } = getAllProducts(); // change this later to "getAllInventory()"
+const { inventory, error, load } = getAllInventory();
 const inventoryData = ref(null);
 const legends = [
     { id: 'skuid', text: 'SKU ID' },
@@ -108,19 +111,12 @@ const legends = [
     { id: 'price', text: 'Price' },
     { id: 'actions', text: 'Actions' },
 ];
-// const legends = [
-//     { id: 'skuid', text: 'SKU ID' },
-//     { id: 'name', text: 'Product Name' },
-//     { id: 'quantity', text: 'Quantity' },
-//     { id: 'actions', text: 'Actions' },
-// ];
 const rows = ref([]); // Used for table rows
 // Do see the SimpleAddEditModal.vue for field object
 const modalAddEditFields = [ // Change this later to inventory
-    { id: 1, type: 'text',  hintText: 'SKU ID*' },
-    { id: 2, type: 'text',  hintText: 'Product Name*' },
-    { id: 3, type: 'dropdowntext',  hintText: 'Category*' },
-    { id: 4, type: 'text',  hintText: 'Price*' },
+    { id: 1, type: 'text',  hintText: 'Product ID' },
+    { id: 2, type: 'text',  hintText: 'Description' },
+    { id: 3, type: 'text',  hintText: 'Quantity' },
 ];
 
 // Variables for Child
@@ -129,6 +125,7 @@ const modalType = ref(null); // add, edit, delete, message
 const isOverlayCalled = ref(false);
 const activeTableRow = ref(null);
 const successfulMessage = ref('');
+const tableState = ref('loading'); // default this to null
 const modalModelValues = ref([
     { id: 1, value: '' },
     { id: 2, value: '' },
@@ -137,7 +134,7 @@ const modalModelValues = ref([
 ]);
 
 // Load data after mount
-onMounted(async () => {
+onMounted(() => {
     loadItems();
 });
 
@@ -201,11 +198,13 @@ async function handleSubmitFromModal(item, hasNoChangesOnEdit) {
 
 // Function reusables
 async function loadItems() {
+    tableState.value = 'loading';
+
     await load();
         
     if (error.value === null) {
         // Change all this later
-        inventoryData.value = products.value;
+        inventoryData.value = inventory.value;
         // use for debug
         // console.log('==============')
         // console.log('inventoryData: ');
@@ -230,12 +229,16 @@ async function loadItems() {
             rows.value.push(newItem); // Add values as rows
         });
 
+        const rowsLength = rows.value.length
+
+        tableState.value = rowsLength === 0 ? 'empty' : 'exist';
+
         // use for debug
         // console.log('==============')
         // console.log('inventoryData: ');
         // console.log(rows.value); 
     } else {
-        // If possible, add a catcher
+        tableState.value = 'empty';
     };
 };
 </script>

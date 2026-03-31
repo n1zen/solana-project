@@ -20,24 +20,38 @@
             </thead>
             <tbody>
                 <div 
-                    id="empty-set"
-                    v-if="rows.length === 0"
+                    class="table-state"
+                    id="loading-set"
+                    v-if="tableState === 'loading'"
                     >
-                    <div id="empty-icon">
+                    <div class="state-icon">
+                        <DatabaseZap 
+                            size="80"
+                            color="var(--color-secondary)"
+                        />
+                    </div>
+                    <p class="state-text">
+                        Loading items from the server...
+                    </p>
+                </div>
+                <div 
+                    class="table-state"
+                    id="empty-set"
+                    v-else-if="tableState === 'empty'"
+                    >
+                    <div class="state-icon">
                         <PackageOpen 
                             size="80"
                             color="var(--color-secondary)"
                         />
                     </div>
-                    <p id="empty-text">
-                        Inventory seems to be empty...
+                    <p class="state-text">
+                        {{ tableStateText }} seems to be empty...
                     </p>
                     <PrimaryButton 
                         text="Add some!"
                         :has-icon="false"
-                        @on-hover=""
-                        @on-leave=""
-                        @on-click=""
+                        @on-click="handleEmptyAddRequest"
                         >
                     </PrimaryButton>
                 </div>
@@ -58,7 +72,7 @@
 
 <script setup>
 // Import outside
-import { PackageOpen, Plus } from 'lucide-vue-next';
+import { DatabaseZap, PackageOpen } from 'lucide-vue-next';
 import SimpleRow from './SimpleRow.vue';
 
 // Vue
@@ -76,6 +90,8 @@ import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
  * [ [ data1, data2 ], [ data1, data2 ] ]
  * +++ The main array contains the rows
  * +++ The second array contains the data
+ * 
+ * tableState accepts 'loading', 'empty', 'exist'
  */
 const props = defineProps({
     tableID: {
@@ -90,10 +106,17 @@ const props = defineProps({
         type: Array,
         default: []
     },
+    tableState: {
+        type: String
+    },
+    tableStateText: {
+        type: String
+    }
 });
 
 const emits = defineEmits([
-    'onRowEdit'
+    'onRowEdit',
+    'onEmptyAdd'
 ]);
 
 // Variables for Child
@@ -106,6 +129,10 @@ function handleClickFromSimpleRow(rowIndex) {
 
 function handleEditRequestFromRow(rowIndex) {
     emits('onRowEdit', rowIndex);
+};
+
+function handleEmptyAddRequest() {
+    emits('onEmptyAdd');
 };
 </script>
 
@@ -148,7 +175,7 @@ input[type=checkbox] {
     }
 }
 
-#empty-set {
+.table-state {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -160,13 +187,13 @@ input[type=checkbox] {
     transform: translate(-50%, -50%);
 }
 
-#empty-icon {
+.state-icon {
     border: 2px solid var(--color-secondary);
     border-radius: 50%;
     padding: 30px;
 }
 
-#empty-text {
+.state-text {
     color: var(--color-secondary);
     font-size: 20px;
 }

@@ -6,7 +6,7 @@ const addProduct = (newItem) => {
 
     const onSubmit = async () => {
         try {
-            const response = await fetch(`http://localhost:8000/api/products`, {
+            const response = await fetch(`http://localhost:8000/api/products/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newItem)
@@ -19,8 +19,6 @@ const addProduct = (newItem) => {
                     : data.detail.map(e => e.msg).join(', ');
                 throw Error(message);
             }
-
-            // alert('Product added successfully');
         } catch (err) {
             error.value = err.message;
             console.log(error.value);

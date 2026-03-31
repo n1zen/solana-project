@@ -1,21 +1,19 @@
 import { ref } from 'vue';
 
-const addInventoryItem = (loadInventory) => {
+const addInventoryItem = (newItem) => {
 
-    const product_id = ref(null);
-    const details = ref('');
-    const quantity = ref(null);
     const error = ref(null);
+    console.log(newItem);
 
     const onSubmit = async () => {
         try {
-            const response = await fetch(`${process.env.VUE_APP_API_URL}/api/inventory`, {
+            const response = await fetch(`http://localhost:8000/api/inventory/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    quantity: quantity.value,
-                    details: details.value,
-                    product_id: product_id.value
+                    quantity: newItem.quantity,
+                    details: newItem.details,
+                    product_id: newItem.product_id
                 })
             });
 
@@ -28,11 +26,6 @@ const addInventoryItem = (loadInventory) => {
             }
 
             alert('Inventory item added successfully');
-            // refresh the product list & clear the form
-            await loadInventory();
-            product_id.value = null;
-            details.value = '';
-            quantity.value = null;
         } catch (err) {
             error.value = err.message;
             alert(error.value);
@@ -40,7 +33,7 @@ const addInventoryItem = (loadInventory) => {
         }
     }
 
-    return { product_id, details, quantity, error, onSubmit };
+    return { error, onSubmit };
 }
 
 export default addInventoryItem;

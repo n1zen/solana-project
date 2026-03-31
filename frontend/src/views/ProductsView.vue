@@ -75,7 +75,10 @@
                 table-i-d="product"
                 :legends="legends"
                 :rows="rows"
+                :table-state="tableState"
+                table-state-text="Product list"
                 @on-row-edit="handleTableRowEdit"
+                @on-empty-add="handleNewItemRequest"
             />
         </div>
     </div>
@@ -122,6 +125,7 @@ const messageIcon = ref(null); // addIcon, editIcon, deleteIcon, messageIcon
 const modalType = ref(null); // add, edit, delete, message
 const isOverlayCalled = ref(false);
 const activeTableRow = ref(null);
+const tableState = ref('loading'); // default this to loading
 const successfulMessage = ref('');
 const modalModelValues = ref([
     { id: 1, value: '' },
@@ -195,6 +199,8 @@ async function handleSubmitFromModal(item, hasNoChangesOnEdit) {
 
 // Function reusables
 async function loadItems() {
+    tableState.value = 'loading';
+
     await load();
         
     if (error.value === null) {
@@ -224,12 +230,16 @@ async function loadItems() {
             rows.value.push(newItem); // Add values as rows
         });
 
+        const rowsLength = rows.value.length
+        
+        tableState.value = rowsLength === 0 ? 'empty' : 'exist';
+
         // use for debug
         // console.log('==============')
         // console.log('productData: ');
         // console.log(rows.value); 
     } else {
-        // If possible, add a catcher
+        tableState.value = 'empty';
     };
 };
 </script>

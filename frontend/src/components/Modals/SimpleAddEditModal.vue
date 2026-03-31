@@ -88,6 +88,7 @@ import { ref } from 'vue';
 // Modules
 import addProduct from '@/modules/product/addProduct';
 import updateProduct from '@/modules/product/updateProduct';
+import addInventoryItem from '@/modules/inventory/addInventory';
 
 // Components
 import SimpleTextInput from '../Inputs/SimpleTextInput.vue';
@@ -211,7 +212,7 @@ async function handleOnSubmit() {
             price: 0,
         },
         { // Inventory
-            productID: 0,
+            product_id: 0,
             details: '',
             quantity: 0
         },
@@ -226,7 +227,8 @@ async function handleOnSubmit() {
             edit: updateProduct
         },
         { // Inventory
-
+            add: addInventoryItem,
+            edit: ''
         },
         { // Orders
 
