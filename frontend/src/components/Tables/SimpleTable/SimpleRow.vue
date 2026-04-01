@@ -81,7 +81,7 @@ const productDataRowTemplate = reactive({
 });
 
 const inventoryDataRowTemplate = reactive({
-    productid: '',
+    productsku: '',
     productname: '',
     quantity: '',
     id: ''
@@ -93,16 +93,14 @@ if (props.tableIsUsedAs === 'products') {
     Object.keys(productDataRowTemplate).forEach(key => {
         productDataRowTemplate[key] = datum[key];
     });
-
-    rowTemplate.value = productDataRowTemplate;
-} else if (props.itemType === 'inventory') {
-    const datum = props.rowData;
-    const productData = datum?.product;
     
-    inventoryDataRowTemplate.productid = productData?.sku;
-    inventoryDataRowTemplate.productname = productData?.name;
-    inventoryDataRowTemplate.quantity = datum.quantity;
-    inventoryDataRowTemplate.id = datum.id;
+    rowTemplate.value = productDataRowTemplate;
+} else if (props.tableIsUsedAs === 'inventory') {
+    const datum = props.rowData;
+    
+    Object.keys(inventoryDataRowTemplate).forEach(key => {
+        inventoryDataRowTemplate[key] = datum[key];
+    });
 
     rowTemplate.value = inventoryDataRowTemplate;
 };

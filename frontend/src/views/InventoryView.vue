@@ -12,11 +12,14 @@
                         modalType === 'edit'
                         "
                         modal-return-text="Cancel"
+                        :modal-type="modalType"
                         :modal-title="modalTitle"
                         :modal-missing-input-text="modalMissingInputText"
                         :input-fields="modalInputFields"
                         :input-values="modalInputValues"
                         :item-row-i-d="activeTableRow"
+                        :item-i-d="modalItemID"
+                        :item-type="1"
                         @on-cancel="handleCloseModalRequest"
                         @on-submit=""
                     />
@@ -118,8 +121,9 @@ import getAllInventory from '@/modules/inventory/getAllInventory';
 import Templates from '@/modules/utils/useTemplates';
 
 const { inventory, error, load } = getAllInventory();
-const { tableRowTemplates } = Templates();
+const { tableRowTemplates, messageTemplates } = Templates();
 const activeTableRow = ref(null);
+const wasModalAddType = ref(false);
 
 // Variables for Table
 const tableState = ref('default');
@@ -147,6 +151,7 @@ const isOverlayCalled = ref(false);
 const modalType = ref('');
 const modalTitle = ref('');
 const modalMissingInputText = ref('');
+const modalItemID = ref('');
 const modalInputFields = ref([
     { type: 'text', hint: 'Product SKU' },
     { type: 'dropdowntext', hint: 'Product Name' },
@@ -154,11 +159,15 @@ const modalInputFields = ref([
     { type: 'text', hint: 'Quantity' },
 ]);
 const modalInputValues = ref({
-    sku: '',
-    name: '',
+    productsku: '',
+    productname: '',
     details: '',
     quantity: ''
 });
+
+// Message Modal
+const messageModalMessage = ref('');
+const messageModalIcon = ref('');
 
 // Initialize
 onMounted(() => {
@@ -192,7 +201,42 @@ function handleNewItemRequest() {
 };
 
 function handleOnEditItemRequest(rowIndex) {
-    console.log(tableRows.value[rowIndex])
+    const tableRowToEdit = tableRows.value[rowIndex];
+
+    Object.keys(modalInputValues.value).forEach(key => {
+        modalInputValues.value[key] = tableRowToEdit[key];
+    });
+
+    isOverlayCalled.value = true;
+    modalType.value = 'edit';
+    modalTitle.value = `Edit Product ${ modalInputValues.value.sku }`;
+    modalItemID.value = tableRowToEdit.id;
+};
+
+function handleOnDeleteItemRequest(rowIndex) {
+    const tableRowToDelete = tableRows.value[rowIndex];
+
+    console.log(tableRowToDelete);
+};
+
+function handleOnSubmitSuccess(submittedValues, noChanges = false) {
+    
+    messageModalMessage.value = messageTemplates(
+        'product',
+        modalType.value,
+        submittedValues,
+        'sku'
+    );
+
+    if (modalType.value === 'add') {
+        messageModalIcon.value = 'addIcon';
+        wasModalAddType.value = true;
+    }
+    else if (modalType.value === 'edit') messageModalIcon.value = 'editIcon';
+    else if (modalType.value === 'delete') messageModalIcon.value = 'deleteIcon';
+    else messageModalIcon.value = 'noChangesIcon';
+
+    modalType.value = 'message';
 };
 
 // Functions Reusable
@@ -213,9 +257,16 @@ async function loadItems() {
             tableRows.value.push(newTableRow);
             tableState.value = 'default';
         });
+
+        if (wasModalAddType.value) {
+            activeTableRow.value = tableRows.value.length - 1;
+            wasModalAddType.value = false;
+        };
     } else {
         tableState.value = 'empty';
     };
+
+    console.log(tableRows.value);
 };
 
 </script>

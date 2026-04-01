@@ -53,11 +53,12 @@
                     </MessageModal>
                     <DeleteModal 
                         v-else-if="modalType === 'delete'"
-                        text-title="product"
-                        desc="This action will permanently delete this product."
+                        :modal-title="modalTitle"
                         item-type="product"
-                        @on-cancel=""
-                        @on-confirm=""
+                        :table-values="deleteModalTableValues"
+                        :item-i-d="modalItemID"
+                        @on-cancel="handleCloseModalRequest"
+                        @on-confirm="handleOnSubmitSuccess"
                     />
                 </transition>
             </template>
@@ -91,8 +92,11 @@
                 :rows="tableRows"
                 :table-state="tableState"
                 :table-state-texts="tableStateTexts"
+                :clicked-row-index="activeTableRow"
                 @row-on-click="handleTableRowOnClick"
+                @on-empty-add-request="handleNewItemRequest"
                 @on-edit-item-request="handleOnEditItemRequest"
+                @on-delete-item-request="handleOnDeleteItemRequest"
             />
         </div>
     </div>
@@ -123,6 +127,7 @@ import Templates from '@/modules/utils/useTemplates';
 const { products, error, load } = getAllProducts();
 const { tableRowTemplates, messageTemplates } = Templates();
 const activeTableRow = ref(null);
+const wasModalAddType = ref(false);
 
 // Variables for Table
 const tableState = ref('default');
@@ -165,6 +170,14 @@ const modalInputValues = ref({
     price: ''
 });
 
+// Delete Modal
+const deleteModalTableValues = ref({
+    sku: { legend: 'Product SKU', value: '' },
+    name: { legend: 'Product Name', value: '' },
+    category: { legend: 'Category', value: '' },
+    price: { legend: 'Price', value: '' },
+});
+
 // Message Modal
 const messageModalMessage = ref('');
 const messageModalIcon = ref('');
@@ -197,6 +210,10 @@ function handleCloseModalRequest() {
         modalInputValues.value[key] = '';
     });
 
+    Object.keys(deleteModalTableValues.value).forEach(key => {
+        deleteModalTableValues.value[key].value = '';
+    });
+
     loadItems();
 };
 
@@ -215,8 +232,21 @@ function handleOnEditItemRequest(rowIndex) {
 
     isOverlayCalled.value = true;
     modalType.value = 'edit';
-    modalTitle.value = `Edit Product ${ modalInputValues.value.sku }`;
+    modalTitle.value = `Edit Product ${ modalInputValues.value.sku }?`;
     modalItemID.value = tableRowToEdit.id;
+};
+
+function handleOnDeleteItemRequest(rowIndex) {
+    const tableRowToDelete = tableRows.value[rowIndex];
+
+    Object.keys(deleteModalTableValues.value).forEach(key => {
+        deleteModalTableValues.value[key].value = tableRowToDelete[key]; 
+    });
+
+    isOverlayCalled.value = true;
+    modalType.value = 'delete';
+    modalTitle.value = `Delete Product ${ deleteModalTableValues.value.sku.value }?`;
+    modalItemID.value = tableRowToDelete.id;
 };
 
 function handleOnSubmitSuccess(submittedValues, noChanges = false) {
@@ -228,10 +258,13 @@ function handleOnSubmitSuccess(submittedValues, noChanges = false) {
         'sku'
     );
 
-    if (modalType.value === 'add') messageModalIcon.value = 'addIcon';
-    if (modalType.value === 'edit') messageModalIcon.value = 'editIcon';
-    if (modalType.value === 'delete') messageModalIcon.value = 'deleteIcon';
-    if (noChanges) messageModalIcon.value = 'noChangesIcon';
+    if (modalType.value === 'add') {
+        messageModalIcon.value = 'addIcon';
+        wasModalAddType.value = true;
+    }
+    else if (modalType.value === 'edit') messageModalIcon.value = 'editIcon';
+    else if (modalType.value === 'delete') messageModalIcon.value = 'deleteIcon';
+    else messageModalIcon.value = 'noChangesIcon';
 
     modalType.value = 'message';
 };
@@ -256,6 +289,11 @@ async function loadItems() {
             tableRows.value.push(newTableRow);
             tableState.value = 'default';
         });
+
+        if (wasModalAddType.value) {
+            activeTableRow.value = tableRows.value.length - 1;
+            wasModalAddType.value = false;
+        };
     } else {
         tableState.value = 'empty';
     };

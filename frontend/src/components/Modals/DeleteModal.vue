@@ -13,13 +13,13 @@
                 </button>
             </section>
             <header>
-                <p id="title">Delete {{ textTitle }} item?</p>
-                <p class="description" id="desc">{{ desc }}</p>
+                <p id="title">{{ modalTitle }}</p>
+                <p class="description" id="desc">This action is irreversible.</p>
                 <p class="description" id="desc-2">Are you sure to proceed?</p>
             </header>
             <section id="info">
                 <table>
-                    <tr v-for="item in items">
+                    <tr v-for="item in tableValues">
                        <td class="type">{{ item.legend }} :</td> 
                        <td class="data">{{ item.value }}</td> 
                     </tr>
@@ -61,29 +61,25 @@ import deleteInventoryItem from '@/modules/inventory/deleteInventoryItem';
 
 // Variables for initialisations
 /**
- * items array acts as a table for the row
- * to be deleted and looks something like
- * { legend: String, value: String || Number }
+ * tableValues should look something like this:
+ * {
+ *    key: { legend: 'Legend Text', value: Any }
+ * }
  */
 const props = defineProps({
-    textTitle: {
+    modalTitle: {
         type: String,
         default: 'text title'
     },
-    desc: {
-        type: String,
-        default: 'A description for the delete modal.'
-    },
-    itemValues: {
+    tableValues: {
         type: Object
+    },
+    itemID: {
+        type: Number,
     },
     itemType: {
         type: String
     },
-    items: {
-        type: Array,
-        default: []
-    }
 });
 
 const emits = defineEmits([
@@ -91,6 +87,8 @@ const emits = defineEmits([
     'onConfirm'
 ])
 
+// Variables for child
+// Primary button
 const btnAddIconColor = ref('#FFFAFA');
 
 function changeButtonAddIconColor() {
@@ -108,7 +106,7 @@ async function handleOnConfirm() {
     };
 
     const searchItemID = {
-        product: props.itemValues.id
+        product: props.itemID
     };
 
     const deleteModule = deleteModules[props.itemType];
@@ -118,7 +116,15 @@ async function handleOnConfirm() {
     await onDelete();
 
     if (error.value === null) {
-        emits('onConfirm', props.itemValues);
+        let deletedValues = {};
+
+        Object.keys(props.tableValues).forEach(key => {
+            let value = props.tableValues[key].value;
+
+            Object.assign(deletedValues, { [key]: value });
+        });
+
+        emits('onConfirm', deletedValues);
     } else {
         // add a catcher if possible
     };

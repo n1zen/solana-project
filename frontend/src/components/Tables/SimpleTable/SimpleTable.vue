@@ -119,6 +119,9 @@ const props = defineProps({
     rows: {
         type: Array
     },
+    clickedRowIndex: {
+        type: Number
+    }
 });
 
 const emits = defineEmits([
@@ -129,11 +132,11 @@ const emits = defineEmits([
 ]);
 
 // Variables for Rows
-const clickedRowIndex = ref(null);
+// const clickedRowIndex = ref(null);
 
 // Function for child
 function handleRowOnClick(rowIndex) {
-    clickedRowIndex.value = rowIndex;
+    // clickedRowIndex.value = rowIndex;
 
     emits('rowOnClick', rowIndex);
 };
