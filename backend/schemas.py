@@ -72,7 +72,7 @@ class InventoryItemBase(BaseModel):
     details: str | None = Field(default=None, min_length=1)
 
 class InventoryItemCreate(InventoryItemBase):
-    product_id: int
+    product_sku: int
 
 class InventoryItemResponse(InventoryItemBase):
     model_config = ConfigDict(from_attributes=True)
