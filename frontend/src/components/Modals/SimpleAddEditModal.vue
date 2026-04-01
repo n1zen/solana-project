@@ -21,20 +21,22 @@
             <form class="simple-modal__form" action="" method="post" @submit.prevent="">
                 <div 
                     class="input-type"
-                    v-for="(field, index) in inputFields"
+                    v-for="(value, key, index) in inputFields"
                     >
                     <SimpleTextInput 
-                        v-if="field.type === 'text'"
+                        v-if="value.type === 'text'"
                         :has-hint="true"
-                        :hint-text="field.hint"
-                        :data="inputData[index]"
+                        :hint-text="value.hint"
+                        :data="inputData[key]"
+                        :data-key="key"
                         @on-input="handleOnInputFromSimpleInputs"
                         />
                     <SimpleDropdownInput 
-                        v-else-if="field.type === 'dropdowntext'"
+                        v-else-if="value.type === 'dropdowntext'"
                         :has-hint="true"
-                        :hint-text="field.hint"
-                        :data="inputData[index]"
+                        :hint-text="value.hint"
+                        :data="inputData[key]"
+                        :data-key="key"
                         @on-input="handleOnInputFromSimpleInputs"
                     />
                 </div>
@@ -122,7 +124,7 @@ const props = defineProps({
         default: 'add'
     },
     inputFields: {
-        type: Array,
+        type: Object,
         required: true,
     },
     inputValues: {
@@ -158,22 +160,34 @@ const emits = defineEmits([
     'onSubmit'
 ]);
 
-const inputData = ref([]);
+const inputData = ref({});
 const hasMissingInput = ref(false);
 
 // Variables for child
 const btnSubmitIconColor = ref('var(--color-primary)');
 
 // Initialise inputData
-Object.values(props.inputValues).forEach((item, index) => {
-    let newInputData = {
-        id: index + 1,
-        value: item,
-        state: item === '' ? 'default' : 'valid'
-    };
+Object.keys(props.inputValues).forEach((key, index) => {
+    let item = props.inputValues[key];
 
-    inputData.value.push(newInputData);
+    Object.assign(inputData.value, {
+        [key]: {
+            id: index + 1,
+            value: item,
+            state: item === '' ? 'default' : 'valid'
+        }
+    });
 });
+
+// Object.values(props.inputValues).forEach((item, index) => {
+//     let newInputData = {
+//         id: index + 1,
+//         value: item,
+//         state: item === '' ? 'default' : 'valid'
+//     };
+
+//     inputData.value.push(newInputData);
+// });
 
 // Variables for appearance
 const resetButtonColor = ref('var(--color-accent)');
@@ -195,11 +209,11 @@ function handleOnLeaveFromResetButton() {
 
 // Function handlers
 function handleOnInputFromSimpleInputs(childObj) {
-    const index = childObj?.refID - 1;
+    const key = childObj?.dataKey;
     const newValue = childObj?.newValue;
 
-    inputData.value[index].value = newValue;
-    inputData.value[index].state = newValue === '' ? 'default' : 'valid';
+    inputData.value[key].value = newValue;
+    inputData.value[key].state = newValue === '' ? 'default' : 'valid';
 };
 
 function handleOnCancel() {
@@ -239,21 +253,21 @@ async function handleOnSubmit() {
     ];
 
     const submitTemplate = submitTemplates[props.itemType];
+    
+    Object.keys(submitTemplate).forEach((key) => {
+        submitTemplate[key] = inputData.value[key].value;
+    });
+    
+    if (props.modalType === 'edit') {
+        const id = props.itemID // The plus one here is for the server
+        
+        Object.assign(submitTemplate, { id });
+    };
 
     // console.log('==============')
     // console.log('submitTemplate:');
     // console.log(submitTemplate);
     
-    Object.keys(submitTemplate).forEach((key, index) => {
-        submitTemplate[key] = inputData.value[index].value;
-    });
-    
-    if (props.modalType === 'edit') {
-        const id = props.itemID // The plus one here is for the server
-    
-        Object.assign(submitTemplate, { id });
-    };
-
     const modules = addEditTypes[props.itemType];
     const action = props.modalType === 'add' ? modules.add : modules.edit
     const { error, onSubmit } = action(submitTemplate);
@@ -262,6 +276,7 @@ async function handleOnSubmit() {
 
     if (error.value === null) {
         emits('onSubmit', submitTemplate);
+        inputData.value = {};
         // use for debug
         // console.log('==============')
         // console.log('submitTemplate: ');

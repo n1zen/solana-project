@@ -157,12 +157,12 @@ const modalType = ref('');
 const modalTitle = ref('');
 const modalMissingInputText = ref('');
 const modalItemID = ref('');
-const modalInputFields = ref([
-    { type: 'text', hint: 'Product SKU' },
-    { type: 'text', hint: 'Product Name' },
-    { type: 'dropdowntext', hint: 'Category' },
-    { type: 'text', hint: 'Price' },
-]);
+const modalInputFields = ref({
+    sku: { type: 'text', hint: 'Product SKU' },
+    name: { type: 'text', hint: 'Product Name' },
+    category: { type: 'dropdowntext', hint: 'Category' },
+    price: { type: 'text', hint: 'Price' },
+});
 const modalInputValues = ref({
     sku: '',
     name: '',
@@ -272,8 +272,8 @@ function handleOnSubmitSuccess(submittedValues, noChanges = false) {
 // Functions Reusable
 async function loadItems() {
     tableState.value = 'loading';
-    
     tableRows.value = [];
+    
     await load();
 
     if (error.value === null && products.value.length !== 0) {

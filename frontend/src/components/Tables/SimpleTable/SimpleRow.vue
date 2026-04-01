@@ -81,8 +81,8 @@ const productDataRowTemplate = reactive({
 });
 
 const inventoryDataRowTemplate = reactive({
-    productsku: '',
-    productname: '',
+    product_sku: '',
+    product_name: '',
     quantity: '',
     id: ''
 });

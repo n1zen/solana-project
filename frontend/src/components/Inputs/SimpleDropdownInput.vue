@@ -53,6 +53,9 @@ const props = defineProps({
     data: {
         type: Object,
     },
+    dataKey: {
+        type: String
+    },
     hasHint: {
         type: Boolean,
         default: true
@@ -80,7 +83,7 @@ watch(() => props.data?.value, (newValue) => {
 // Function handler
 function handleOnInput() {
     emits('onInput', {
-        refID: props.data?.id,
+        dataKey: props.dataKey,
         newValue: modelValue.value
     });
 };

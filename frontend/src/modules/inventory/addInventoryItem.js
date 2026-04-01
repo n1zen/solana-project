@@ -9,11 +9,7 @@ const addInventoryItem = (newItem) => {
             const response = await fetch(`http://localhost:8000/api/inventory/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    quantity: newItem.quantity,
-                    details: newItem.details,
-                    product_sku: newItem.product_sku
-                })
+                body: JSON.stringify(newItem)
             });
 
             if (!response.ok) {

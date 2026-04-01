@@ -19,8 +19,8 @@ const Templates = () => {
                 quantity: data.quantity,
                 details: data.details,
                 id: data.id,
-                productsku: data.product.sku,
-                productname: data.product.name,
+                product_sku: data.product.sku,
+                product_name: data.product.name,
                 rowIndex
             };
 
@@ -38,6 +38,14 @@ const Templates = () => {
                 add: `Product ${ data[key] } has been added successfully!`,
                 edit: `Product ${ data[key] } has been updated successfully!`,
                 delete: `Product ${ data[key] } has been deleted successfully!`
+            }
+
+            messageTemplate = messageTemplates[messageType];
+        } else if (type === 'inventory') {
+            const messageTemplates = {
+                add: `Product ${ data[key] } has been added to inventory!`,
+                edit: `Product ${ data[key] } has been updated successfully!`,
+                delete: `Product ${ data[key] } has been deleted from the inventory!`
             }
 
             messageTemplate = messageTemplates[messageType];

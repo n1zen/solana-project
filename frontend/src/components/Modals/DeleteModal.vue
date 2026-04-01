@@ -105,13 +105,8 @@ async function handleOnConfirm() {
         inventory: deleteInventoryItem
     };
 
-    const searchItemID = {
-        product: props.itemID
-    };
-
     const deleteModule = deleteModules[props.itemType];
-    const itemID = searchItemID[props.itemType];
-    const { error, onDelete } = deleteModule(itemID);
+    const { error, onDelete } = deleteModule(props.itemID);
 
     await onDelete();
 

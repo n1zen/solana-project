@@ -21,31 +21,31 @@
                         :item-i-d="modalItemID"
                         :item-type="1"
                         @on-cancel="handleCloseModalRequest"
-                        @on-submit=""
+                        @on-submit="handleOnSubmitSuccess"
                     />
                     <MessageModal 
                         v-else-if="modalType === 'message'"
-                        :message="''"
-                        @on-confirm=""
+                        :message="messageModalMessage"
+                        @on-confirm="handleCloseModalRequest"
                         >
                         <template #sMessageIcon>
                             <PackagePlus 
-                                v-if="messageIcon === 'addIcon'"
+                                v-if="messageModalIcon === 'addIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                                 />
                             <PackageCheck 
-                                v-if="messageIcon === 'editIcon'"
+                                v-if="messageModalIcon === 'editIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                                 />
                             <PackageX 
-                                v-if="messageIcon === 'deleteIcon'"
+                                v-if="messageModalIcon === 'deleteIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                                 />
                             <FilePen 
-                                v-if="messageIcon === 'noChangesIcon'"
+                                v-if="messageModalIcon === 'noChangesIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                             />
@@ -53,11 +53,12 @@
                     </MessageModal>
                     <DeleteModal 
                         v-else-if="modalType === 'delete'"
-                        text-title="inventory"
-                        desc="This action will permanently delete this item."
+                        :modal-title="modalTitle"
                         item-type="inventory"
-                        @on-cancel=""
-                        @on-confirm=""
+                        :table-values="deleteModalTableValues"
+                        :item-i-d="modalItemID"
+                        @on-cancel="handleCloseModalRequest"
+                        @on-confirm="handleOnSubmitSuccess"
                     />
                 </transition>
             </template>
@@ -91,9 +92,11 @@
                 :rows="tableRows"
                 :table-state="tableState"
                 :table-state-texts="tableStateTexts"
+                :clicked-row-index="activeTableRow"
                 @row-on-click="handleTableRowOnClick"
                 @on-empty-add-request="handleNewItemRequest"
                 @on-edit-item-request="handleOnEditItemRequest"
+                @on-delete-item-request="handleOnDeleteItemRequest"
             />
         </div>
     </div>
@@ -152,17 +155,25 @@ const modalType = ref('');
 const modalTitle = ref('');
 const modalMissingInputText = ref('');
 const modalItemID = ref('');
-const modalInputFields = ref([
-    { type: 'text', hint: 'Product SKU' },
-    { type: 'dropdowntext', hint: 'Product Name' },
-    { type: 'text', hint: 'Details' },
-    { type: 'text', hint: 'Quantity' },
-]);
+const modalInputFields = ref({
+    product_sku: { type: 'text', hint: 'Product SKU' },
+    product_name: { type: 'dropdowntext', hint: 'Product Name' },
+    details: { type: 'text', hint: 'Details' },
+    quantity: { type: 'text', hint: 'Quantity' },
+});
 const modalInputValues = ref({
-    productsku: '',
-    productname: '',
+    product_sku: '',
+    product_name: '',
     details: '',
     quantity: ''
+});
+
+// Delete Modal
+const deleteModalTableValues = ref({
+    product_sku: { legend: 'Product SKU', value: '' },
+    product_name: { legend: 'Product Name', value: '' },
+    details: { legend: 'Details', value: '' },
+    quantity: { legend: 'Quantity', value: '' },
 });
 
 // Message Modal
@@ -192,6 +203,12 @@ function handleCloseModalRequest() {
     isOverlayCalled.value = false;
     modalType.value = '';
     modalTitle.value = '';
+
+    Object.keys(modalInputValues.value).forEach(key => {
+        modalInputValues.value[key] = '';
+    });
+    
+    loadItems();
 };
 
 function handleNewItemRequest() {
@@ -216,16 +233,22 @@ function handleOnEditItemRequest(rowIndex) {
 function handleOnDeleteItemRequest(rowIndex) {
     const tableRowToDelete = tableRows.value[rowIndex];
 
-    console.log(tableRowToDelete);
+    Object.keys(deleteModalTableValues.value).forEach(key => {
+        deleteModalTableValues.value[key].value = tableRowToDelete[key]; 
+    });
+
+    isOverlayCalled.value = true;
+    modalType.value = 'delete';
+    modalTitle.value = `Delete Product ${ deleteModalTableValues.value.product_sku.value }?`;
+    modalItemID.value = tableRowToDelete.id;
 };
 
 function handleOnSubmitSuccess(submittedValues, noChanges = false) {
-    
     messageModalMessage.value = messageTemplates(
-        'product',
+        'inventory',
         modalType.value,
         submittedValues,
-        'sku'
+        'product_sku'
     );
 
     if (modalType.value === 'add') {
@@ -242,6 +265,8 @@ function handleOnSubmitSuccess(submittedValues, noChanges = false) {
 // Functions Reusable
 async function loadItems() {
     tableState.value = 'loading';
+    tableRows.value = [];
+
     await load();
 
     if (error.value === null && inventory.value.length !== 0) {
@@ -265,8 +290,6 @@ async function loadItems() {
     } else {
         tableState.value = 'empty';
     };
-
-    console.log(tableRows.value);
 };
 
 </script>
