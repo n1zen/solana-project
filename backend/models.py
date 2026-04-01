@@ -42,8 +42,8 @@ class InventoryItem(Base):
     __tablename__ = "inventory"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    product_id: Mapped[int] = mapped_column(
-        ForeignKey("products.id", ondelete="CASCADE"),
+    product_sku: Mapped[int] = mapped_column(
+        ForeignKey("products.sku", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
