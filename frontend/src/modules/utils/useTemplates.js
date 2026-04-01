@@ -1,7 +1,7 @@
 const Templates = () => {
-    
+
     const tableRowTemplates = (type, rowIndex, data) => {
-        let rowTemplate = {}; 
+        let rowTemplate = {};
 
         if (type === 'product') {
             let productTemplate = {
@@ -30,8 +30,25 @@ const Templates = () => {
         return rowTemplate;
     };
 
+    const messageTemplates = (type, messageType, data, key) => {
+        let messageTemplate = {}
+
+        if (type === 'product') {
+            const messageTemplates = {
+                add: `Product ${ data[key] } has been added successfully!`,
+                edit: `Product ${ data[key] } has been updated successfully!`,
+                delete: `Product ${ data[key] } has been deleted successfully!`
+            }
+
+            messageTemplate = messageTemplates[messageType];
+        }
+
+        return messageTemplate;
+    };
+
     return {
         tableRowTemplates,
+        messageTemplates
     };
 };
 

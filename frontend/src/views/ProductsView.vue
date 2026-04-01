@@ -12,6 +12,7 @@
                         modalType === 'edit'
                         "
                         modal-return-text="Cancel"
+                        :modal-type="modalType"
                         :modal-title="modalTitle"
                         :modal-missing-input-text="modalMissingInputText"
                         :input-fields="modalInputFields"
@@ -20,31 +21,31 @@
                         :item-i-d="modalItemID"
                         :item-type="0"
                         @on-cancel="handleCloseModalRequest"
-                        @on-submit=""
+                        @on-submit="handleOnSubmitSuccess"
                     />
                     <MessageModal 
                         v-else-if="modalType === 'message'"
-                        :message="''"
-                        @on-confirm=""
+                        :message="messageModalMessage"
+                        @on-confirm="handleCloseModalRequest"
                         >
                         <template #sMessageIcon>
                             <PackagePlus 
-                                v-if="messageIcon === 'addIcon'"
+                                v-if="messageModalIcon === 'addIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                                 />
                             <PackageCheck 
-                                v-if="messageIcon === 'editIcon'"
+                                v-if="messageModalIcon === 'editIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                                 />
                             <PackageX 
-                                v-if="messageIcon === 'deleteIcon'"
+                                v-if="messageModalIcon === 'deleteIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                                 />
                             <FilePen 
-                                v-if="messageIcon === 'noChangesIcon'"
+                                v-if="messageModalIcon === 'noChangesIcon'"
                                 size="60"
                                 color="var(--color-valid)"
                             />
@@ -120,7 +121,7 @@ import Templates from '@/modules/utils/useTemplates';
 
 // Personal Variables
 const { products, error, load } = getAllProducts();
-const { tableRowTemplates } = Templates();
+const { tableRowTemplates, messageTemplates } = Templates();
 const activeTableRow = ref(null);
 
 // Variables for Table
@@ -164,6 +165,10 @@ const modalInputValues = ref({
     price: ''
 });
 
+// Message Modal
+const messageModalMessage = ref('');
+const messageModalIcon = ref('');
+
 // Initialize
 onMounted(() => {
     loadItems();
@@ -191,6 +196,8 @@ function handleCloseModalRequest() {
     Object.keys(modalInputValues.value).forEach(key => {
         modalInputValues.value[key] = '';
     });
+
+    loadItems();
 };
 
 function handleNewItemRequest() {
@@ -212,9 +219,28 @@ function handleOnEditItemRequest(rowIndex) {
     modalItemID.value = tableRowToEdit.id;
 };
 
+function handleOnSubmitSuccess(submittedValues, noChanges = false) {
+    
+    messageModalMessage.value = messageTemplates(
+        'product',
+        modalType.value,
+        submittedValues,
+        'sku'
+    );
+
+    if (modalType.value === 'add') messageModalIcon.value = 'addIcon';
+    if (modalType.value === 'edit') messageModalIcon.value = 'editIcon';
+    if (modalType.value === 'delete') messageModalIcon.value = 'deleteIcon';
+    if (noChanges) messageModalIcon.value = 'noChangesIcon';
+
+    modalType.value = 'message';
+};
+
 // Functions Reusable
 async function loadItems() {
     tableState.value = 'loading';
+    
+    tableRows.value = [];
     await load();
 
     if (error.value === null && products.value.length !== 0) {
@@ -234,162 +260,6 @@ async function loadItems() {
         tableState.value = 'empty';
     };
 };
-
-// // Variables for inits
-// const { products, error, load } = getAllProducts(); 
-// const legends = [
-//     { id: 'skuid', text: 'SKU ID' },
-//     { id: 'name', text: 'Product Name' },
-//     { id: 'category', text: 'Category' },
-//     { id: 'price', text: 'Price' },
-//     { id: 'actions', text: 'Actions' },
-// ];
-// // Do see the SimpleAddEditModal.vue for field object
-// const modalAddEditFields = [ // Change this later to inventory
-//     { id: 1, type: 'text',  hintText: 'SKU ID*' },
-//     { id: 2, type: 'text',  hintText: 'Product Name*' },
-//     { id: 3, type: 'dropdowntext',  hintText: 'Category*' },
-//     { id: 4, type: 'text',  hintText: 'Price*' },
-// ];
-    
-
-// // Variables for Child
-// const messageIcon = ref(null); // addIcon, editIcon, deleteIcon, messageIcon
-// const modalType = ref(null); // add, edit, delete, message
-// const isOverlayCalled = ref(false);
-// const activeTableRow = ref(null);
-// const tableState = ref('loading'); // default this to loading
-// const successfulMessage = ref('');
-// const editItemID = ref(null);
-// const deleteItemValues = ref({});
-// const modalModelValues = reactive({
-//     sku: '',
-//     name: '',
-//     category: '',
-//     price: '',
-// });
-// const deleteTableValues = ref([
-//     { legend: 'SKUID', value: '' },
-//     { legend: 'Product Name', value: '' },
-//     { legend: 'Category', value: '' },
-//     { legend: 'Price', value: '' }
-// ]);
-
-// // Load data after mount
-// onMounted(() => {
-//     loadItems();
-// });
-
-// // Variables for children
-// const btnAddIconColor = ref("#FFFAFA");
-
-// // Function Appearances
-// function changeButtonAddIconColor() {
-//     btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
-// };
-
-// function reinitializeModalVariables() {
-//     isOverlayCalled.value = false;
-//     successfulMessage.value = '';
-//     modalType.value = null;
-//     messageIcon.value = null;
-
-//     Object.keys(modalModelValues).forEach(key => {
-//         modalModelValues[key] = '';
-//     });
-
-//     deleteTableValues.value.forEach(item => {
-//         item.value = '';
-//     });
-// };
-
-// // Function Handlers
-// // Opens the modal for edit
-// function handleNewItemRequest() {
-//     isOverlayCalled.value = true;
-//     modalType.value = 'add'
-//     activeTableRow.value = null;
-// };
-
-// // Opens the modal for edit
-// function handleTableRowEdit(rowIndex) {
-//     const product = products.value[rowIndex];
-    
-//     activeTableRow.value = rowIndex;
-//     isOverlayCalled.value = true;
-//     modalType.value = 'edit';
-//     editItemID.value = product.id;
-
-//     modalModelValues.sku = product.sku;
-//     modalModelValues.name = product.name;
-//     modalModelValues.category = product.category;
-//     modalModelValues.price = product.price;
-
-//     console.log(modalModelValues);
-
-//     // use for debug
-//     // console.log('==============')
-//     // console.log('modalModelValues: ');
-//     // console.log(modalModelValues.value);
-// };
-
-// // Opens the modal for delete
-// function handleTableRowDelete(rowIndex) {
-//     const product = products.value[rowIndex];
-//     console.log(products.value);
-    
-//     deleteItemValues.value = product;
-//     activeTableRow.value = rowIndex;
-//     isOverlayCalled.value = true;
-//     modalType.value = 'delete';
-
-//     const productValues = [
-//         product.sku,
-//         product.name,
-//         product.category,
-//         product.price,
-//     ]
-    
-//     deleteTableValues.value.forEach((item, index) => {
-//         item.value = productValues[index];
-//     });
-// };
-
-// // Handle successful add/edit submission from modal
-// function handleSubmitFromModal(submittedValues, hasNoChangesOnEdit = false) {
-//     const item = submittedValues.name;
-
-//     const messageTemplates = {
-//         add: `${ item } has been added successfully!`,
-//         edit: `${ item } has been updated successfully!`,
-//         delete: `${ item } has been removed successfully!`,
-//     };
-
-//     if (hasNoChangesOnEdit) messageIcon.value = 'noChangesIcon';
-//     else messageIcon.value = `${ modalType.value }Icon`;
-
-//     successfulMessage.value = messageTemplates[modalType.value];
-//     modalType.value = 'message';
-//     products.value = [];
-
-//     loadItems();
-// };
-
-// // Function reusables
-// async function loadItems() {
-//     tableState.value = 'loading';
-
-//     await load();
-//     console.log(products.value);
-        
-//     if (error.value === null) {
-//         const productLength = products.value.length
-        
-//         tableState.value = productLength === 0 ? 'empty' : 'exist';
-//     } else {
-//         tableState.value = 'empty';
-//     };
-// };
 </script>
 
 <style scoped>

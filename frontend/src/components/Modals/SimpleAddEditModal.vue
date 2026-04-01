@@ -33,7 +33,7 @@
                     <SimpleDropdownInput 
                         v-else-if="field.type === 'dropdowntext'"
                         :has-hint="true"
-                        :hint-text="field.hintText"
+                        :hint-text="field.hint"
                         :data="inputData[index]"
                         @on-input="handleOnInputFromSimpleInputs"
                     />
@@ -130,7 +130,7 @@ const props = defineProps({
         required: true
     },
     itemID: {
-        type: Number,
+        type: [ Number, String ],
     },
     itemType: {
         type: Number,
@@ -241,8 +241,8 @@ async function handleOnSubmit() {
     const submitTemplate = submitTemplates[props.itemType];
 
     // console.log('==============')
-    console.log('submitTemplate:');
-    console.log(submitTemplate);
+    // console.log('submitTemplate:');
+    // console.log(submitTemplate);
     
     Object.keys(submitTemplate).forEach((key, index) => {
         submitTemplate[key] = inputData.value[index].value;
