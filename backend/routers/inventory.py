@@ -24,7 +24,7 @@ router = APIRouter()
         status_code=status.HTTP_201_CREATED)
 async def create_inventory_item(inventory_item: InventoryItemCreate, db: Annotated[AsyncSession, Depends(get_db)]):
     new_inventory_item = models.InventoryItem(
-        product_id = inventory_item.product_id,
+        product_sku = inventory_item.product_sku,
         quantity = inventory_item.quantity,
         details = inventory_item.details,
     )
@@ -77,8 +77,8 @@ async def update_inventory_item(inventory_id: int, item_update: InventoryItemUpd
         item.quantity = item_update.quantity
     if item_update.details is not None:
         item.details = item_update.details
-    if item_update.product_id is not None:
-        item.product_id = item_update.product_id
+    if item_update.product_sku is not None:
+        item.product_sku = item_update.product_sku
 
     await db.commit()
     await db.refresh(item, attribute_names=["product"])
