@@ -17,6 +17,8 @@
                         :input-fields="modalInputFields"
                         :input-values="modalInputValues"
                         :item-row-i-d="activeTableRow"
+                        :item-i-d="modalItemID"
+                        :item-type="0"
                         @on-cancel="handleCloseModalRequest"
                         @on-submit=""
                     />
@@ -89,6 +91,7 @@
                 :table-state="tableState"
                 :table-state-texts="tableStateTexts"
                 @row-on-click="handleTableRowOnClick"
+                @on-edit-item-request="handleOnEditItemRequest"
             />
         </div>
     </div>
@@ -99,7 +102,7 @@
 import { FilePen, PackageCheck, PackagePlus, PackageX, Plus } from 'lucide-vue-next';
 
 // Vue
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 // Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
@@ -147,6 +150,7 @@ const isOverlayCalled = ref(false);
 const modalType = ref('');
 const modalTitle = ref('');
 const modalMissingInputText = ref('');
+const modalItemID = ref('');
 const modalInputFields = ref([
     { type: 'text', hint: 'Product SKU' },
     { type: 'text', hint: 'Product Name' },
@@ -183,12 +187,29 @@ function handleCloseModalRequest() {
     isOverlayCalled.value = false;
     modalType.value = '';
     modalTitle.value = '';
+    
+    Object.keys(modalInputValues.value).forEach(key => {
+        modalInputValues.value[key] = '';
+    });
 };
 
 function handleNewItemRequest() {
     isOverlayCalled.value = true;
     modalType.value = 'add';
     modalTitle.value = 'Add new product';
+};
+
+function handleOnEditItemRequest(rowIndex) {
+    const tableRowToEdit = tableRows.value[rowIndex];
+
+    Object.keys(modalInputValues.value).forEach(key => {
+        modalInputValues.value[key] = tableRowToEdit[key];
+    });
+
+    isOverlayCalled.value = true;
+    modalType.value = 'edit';
+    modalTitle.value = `Edit Product ${ modalInputValues.value.sku }`;
+    modalItemID.value = tableRowToEdit.id;
 };
 
 // Functions Reusable

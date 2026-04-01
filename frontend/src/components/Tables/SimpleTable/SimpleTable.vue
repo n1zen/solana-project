@@ -50,7 +50,7 @@
                     <PrimaryButton 
                         text="Add some!"
                         :has-icon="false"
-                        @on-click=""
+                        @on-click="handleOnEmptyAddRequest"
                         >
                     </PrimaryButton>
                 </div>
@@ -61,8 +61,8 @@
                     :table-is-used-as="tableIsUsedAs"
                     :is-currently-clicked="clickedRowIndex === index"
                     @on-click="handleRowOnClick"
-                    @on-edit=""
-                    @on-delete=""
+                    @on-edit="handleOnEditItemRequest"
+                    @on-delete="handleOnDeleteItemRequest"
                 />
             </tbody>
         </table>
@@ -122,7 +122,10 @@ const props = defineProps({
 });
 
 const emits = defineEmits([
-    'rowOnClick'
+    'rowOnClick',
+    'onEmptyAddRequest',
+    'onEditItemRequest',
+    'onDeleteItemRequest'
 ]);
 
 // Variables for Rows
@@ -131,8 +134,21 @@ const clickedRowIndex = ref(null);
 // Function for child
 function handleRowOnClick(rowIndex) {
     clickedRowIndex.value = rowIndex;
-    
+
     emits('rowOnClick', rowIndex);
+};
+
+function handleOnEmptyAddRequest() {
+    emits('onEmptyAddRequest');
+};
+
+// Function handlers
+function handleOnEditItemRequest(rowIndex) {
+    emits('onEditItemRequest', rowIndex);
+};
+
+function handleOnDeleteItemRequest(rowIndex) {
+    emits('onDeleteItemRequest', rowIndex);
 };
 </script>
 

@@ -102,6 +102,7 @@ import PrimaryButton from '../Buttons/PrimaryButton.vue';
 
 // Modules
 
+// Use Modules
 
 // Variables for inits
 /**
@@ -128,11 +129,11 @@ const props = defineProps({
         type: Object,
         required: true
     },
-    itemRowID: {
+    itemID: {
         type: Number,
     },
     itemType: {
-        type: String,
+        type: Number,
     },
     modalTitle: {
         type: String,
@@ -206,65 +207,65 @@ function handleOnCancel() {
 };
 
 async function handleOnSubmit() {
-    const itemTemplates = [
-        { // Products
+    const submitTemplates = [
+        { // Products = 0
             sku: 0,
             name: 'Product Name',
             category: 'Category',
             price: 0,
         },
-        { // Inventory
+        { // Inventory = 1
             product_sku: 0,
             details: '',
             quantity: 0
         },
-        { // Orders
+        { // Orders = 2
 
         }
     ];
 
     const addEditTypes = [
-        { // Product
+        { // Product = 0
             add: addProduct,
             edit: updateProduct
         },
-        { // Inventory
+        { // Inventory = 1
             add: addInventoryItem,
             edit: updateInventoryItem
         },
-        { // Orders
+        { // Orders = 2
 
         }
     ];
 
-    const itemTemplate = itemTemplates[props.itemType];
+    const submitTemplate = submitTemplates[props.itemType];
 
     // console.log('==============')
-    console.log('itemTemplate:');
-    console.log(itemTemplate);
+    console.log('submitTemplate:');
+    console.log(submitTemplate);
     
-    Object.keys(itemTemplate).forEach((key, index) => {
-        itemTemplate[key] = inputData.value[index].value;
+    Object.keys(submitTemplate).forEach((key, index) => {
+        submitTemplate[key] = inputData.value[index].value;
     });
     
-    if (props.itemIDForEdit) {
-        const id = props.itemIDForEdit // The plus one here is for the server
+    if (props.modalType === 'edit') {
+        const id = props.itemID // The plus one here is for the server
     
-        Object.assign(itemTemplate, { id });
+        Object.assign(submitTemplate, { id });
     };
 
     const modules = addEditTypes[props.itemType];
     const action = props.modalType === 'add' ? modules.add : modules.edit
-    const { error, onSubmit } = action(itemTemplate);
+    const { error, onSubmit } = action(submitTemplate);
 
     await onSubmit();
 
     if (error.value === null) {
-        emits('onSubmit', itemTemplate);
+        emits('onSubmit', submitTemplate);
         // use for debug
         // console.log('==============')
-        // console.log('itemTemplate: ');
-        // console.log(itemTemplate);
+        // console.log('submitTemplate: ');
+        // console.log(submitTemplate);
     } else {
         handleExistingInput(error.value);
     };

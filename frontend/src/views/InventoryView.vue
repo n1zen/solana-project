@@ -88,6 +88,9 @@
                 :rows="tableRows"
                 :table-state="tableState"
                 :table-state-texts="tableStateTexts"
+                @row-on-click="handleTableRowOnClick"
+                @on-empty-add-request="handleNewItemRequest"
+                @on-edit-item-request="handleOnEditItemRequest"
             />
         </div>
     </div>
@@ -153,8 +156,8 @@ const modalInputFields = ref([
 const modalInputValues = ref({
     sku: '',
     name: '',
-    category: '',
-    price: ''
+    details: '',
+    quantity: ''
 });
 
 // Initialize
@@ -188,6 +191,10 @@ function handleNewItemRequest() {
     modalTitle.value = 'Add new item';
 };
 
+function handleOnEditItemRequest(rowIndex) {
+    console.log(tableRows.value[rowIndex])
+};
+
 // Functions Reusable
 async function loadItems() {
     tableState.value = 'loading';
@@ -208,7 +215,6 @@ async function loadItems() {
         });
     } else {
         tableState.value = 'empty';
-        console.log('ahsdkajsd');
     };
 };
 
