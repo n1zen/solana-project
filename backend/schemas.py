@@ -84,7 +84,7 @@ class InventoryItemResponse(InventoryItemBase):
 class InventoryItemUpdate(BaseModel):
     quantity: int | None = Field(default=None)
     details: Annotated[str | None, Field(min_length=1)] = None
-    product_id: int | None = Field(default=None)
+    product_sku: int | None = Field(default=None)
 
 class OrderItemBase(BaseModel):
     inventory_item_id: int
