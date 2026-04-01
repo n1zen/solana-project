@@ -1,11 +1,10 @@
 <template>
     <div class="simple-table">
-        <table :id="tableID">
+        <table :id="tableIsUsedAs">
             <thead>
                 <tr id="legend">
                     <th 
                         v-for="(legend, index) in legends"
-                        :id="'legend-' + legend.id"
                     >
                         <input 
                             type="checkbox" 
@@ -13,7 +12,7 @@
                             v-if="index === 0"
                             >
                         <span class="legend-text">
-                            {{ legend.text }}
+                            {{ legend }}
                         </span>
                     </th>
                 </tr>
@@ -31,7 +30,7 @@
                         />
                     </div>
                     <p class="state-text">
-                        Loading items from the server...
+                        {{ tableStateTexts.loading }}
                     </p>
                 </div>
                 <div 
@@ -46,25 +45,24 @@
                         />
                     </div>
                     <p class="state-text">
-                        {{ tableStateText }} seems to be empty...
+                        {{ tableStateTexts.empty }}
                     </p>
                     <PrimaryButton 
                         text="Add some!"
                         :has-icon="false"
-                        @on-click="handleEmptyAddRequest"
+                        @on-click=""
                         >
                     </PrimaryButton>
                 </div>
                 <SimpleRow 
                     v-for="(row, index) in rows"
                     :key="index"
-                    :data="row"
-                    :rowIndex="index"
-                    :item-type="itemType"
-                    :is-currently-clicked="activeRowIndex === index"
-                    @on-click="handleClickFromSimpleRow"
-                    @on-edit="handleEditRequestFromRow"
-                    @on-delete="handleDeleteRequestFromRow"
+                    :row-data="row"
+                    :table-is-used-as="tableIsUsedAs"
+                    :is-currently-clicked="clickedRowIndex === index"
+                    @on-click="handleRowOnClick"
+                    @on-edit=""
+                    @on-delete=""
                 />
             </tbody>
         </table>
@@ -77,66 +75,64 @@ import { DatabaseZap, PackageOpen } from 'lucide-vue-next';
 import SimpleRow from './SimpleRow.vue';
 
 // Vue
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 
 // Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
 
+
+// Personal Variables
 /**
- * Template for 'props.legends'
- * [ { id: String, text: String } ]
- * i.e. id: 'name', text: 'Product Name'
+ * tableIsUsedAs is a variable to show that the table
+ * is either used as a product, inventory, order, etc. 
  * 
- * tableState accepts 'loading', 'empty', 'exist'
+ * tableState is a text to show the current state of the table
+ * It accepts 'default', 'loading', 'empty', 'offline'
+ * 
+ * legends are texts used to display on top of the table
+ * to visually show what the rows are about.
+ * legends template:
+ * legends: [
+ *     legendText (String),
+ *     legendText (String),
+ *     ...
+ * ]
+ * 
+ * rows are the object data to be displayed including data
+ * for searching and appearance purposes
  */
 const props = defineProps({
-    tableID: {
-        type: String,
-        default: ''
-    },
-    legends: {
-        type: Array,
-        default: []
-    },
-    rows: {
-        type: Array,
-        default: []
-    },
-    itemType: {
+    tableIsUsedAs: {
         type: String,
     },
     tableState: {
-        type: String
+        type: String,
+        required: true
     },
-    tableStateText: {
-        type: String
-    }
+    tableStateTexts: {
+        type: Object
+    },
+    legends: {
+        type: Array,
+        // required: true
+    },
+    rows: {
+        type: Array
+    },
 });
 
 const emits = defineEmits([
-    'onRowEdit',
-    'onRowDelete',
-    'onEmptyAdd'
+    'rowOnClick'
 ]);
 
-// Variables for Child
-const activeRowIndex = ref(null);
+// Variables for Rows
+const clickedRowIndex = ref(null);
 
-// Function From Child
-function handleClickFromSimpleRow(rowIndex) {
-    activeRowIndex.value = rowIndex;
-};
-
-function handleEditRequestFromRow(rowIndex) {
-    emits('onRowEdit', rowIndex);
-};
-
-function handleDeleteRequestFromRow(rowItemID, rowIndex) {
-    emits('onRowDelete', rowItemID, rowIndex);
-};
-
-function handleEmptyAddRequest() {
-    emits('onEmptyAdd');
+// Function for child
+function handleRowOnClick(rowIndex) {
+    clickedRowIndex.value = rowIndex;
+    
+    emits('rowOnClick', rowIndex);
 };
 </script>
 

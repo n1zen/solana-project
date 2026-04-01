@@ -48,19 +48,15 @@ import { reactive, ref } from 'vue';
 
 // Variables for inits
 /**
- * See SimpleTable.vue to understand what is data
- * but basically, it is datum of the row
+ * See SimpleTable.vue for more information
  */
 const props= defineProps({
-    rowIndex: {
-        type: Number,
+    tableIsUsedAs: {
+        type: String
     },
-    data: {
+    rowData: {
         type: Object,
         default: {}
-    },
-    itemType: {
-        type: String,
     },
     isCurrentlyClicked: {
         type: Boolean,
@@ -91,8 +87,8 @@ const inventoryDataRowTemplate = reactive({
     id: ''
 });
 
-if (props.itemType === 'product') {
-    const datum = props.data;
+if (props.tableIsUsedAs === 'products') {
+    const datum = props.rowData;
     
     Object.keys(productDataRowTemplate).forEach(key => {
         productDataRowTemplate[key] = datum[key];
@@ -100,7 +96,7 @@ if (props.itemType === 'product') {
 
     rowTemplate.value = productDataRowTemplate;
 } else if (props.itemType === 'inventory') {
-    const datum = props.data;
+    const datum = props.rowData;
     const productData = datum?.product;
     
     inventoryDataRowTemplate.productid = productData?.sku;
@@ -113,15 +109,15 @@ if (props.itemType === 'product') {
 
 // Function Handlers
 function handleOnClick() {
-    emits('onClick', props.rowIndex);
+    emits('onClick', props.rowData.rowIndex);
 };
 
 function handleOnEdit() {
-    emits('onEdit', props.rowIndex);
+    emits('onEdit', props.rowData.rowIndex);
 };
 
 function handleOnDelete() {
-    emits('onDelete', props.rowIndex);
+    emits('onDelete', props.rowData.rowIndex);
 };
 </script>
 

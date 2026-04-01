@@ -9,7 +9,7 @@
                     <ArrowLeft 
                         size="10"
                     />
-                    <p class="return-text">{{ returnText }}</p>
+                    <p class="return-text">{{ modalReturnText }}</p>
                 </button>
             </section>
             <header>
@@ -21,12 +21,12 @@
             <form class="simple-modal__form" action="" method="post" @submit.prevent="">
                 <div 
                     class="input-type"
-                    v-for="(field, index) in fields"
+                    v-for="(field, index) in inputFields"
                     >
                     <SimpleTextInput 
                         v-if="field.type === 'text'"
                         :has-hint="true"
-                        :hint-text="field.hintText"
+                        :hint-text="field.hint"
                         :data="inputData[index]"
                         @on-input="handleOnInputFromSimpleInputs"
                         />
@@ -44,7 +44,7 @@
                     id="missing-container"
                     v-if="hasMissingInput"
                     >
-                    {{ missingText }}
+                    {{ modalMissingInputText }}
                 </div>
                 <div id="actions">
                     <NudeButton 
@@ -55,20 +55,23 @@
                         @on-mouse-leave="handleOnLeaveFromResetButton"
                     />
                     <PrimaryButton
+                        id="submit-button"
                         :text="modalSubmitText"
                         :has-icon="true"
+                        @on-hover="changeButtonSubmitIconColor"
+                        @on-leave="changeButtonSubmitIconColor"
                         @on-click="handleOnSubmit"
                     >
                         <template #sIcon>
                             <Plus 
                                 v-if="modalType === 'add'"
                                 size="16"
-                                color=""
-                            />
+                                :color="btnSubmitIconColor"
+                                />
                             <SquarePen 
                                 v-else
                                 size="16"
-                                color=""
+                                :color="btnSubmitIconColor"
                             />
                         </template>
                     </PrimaryButton>
@@ -102,49 +105,48 @@ import PrimaryButton from '../Buttons/PrimaryButton.vue';
 
 // Variables for inits
 /**
- * fields object has the following:
+ * inputFields object has the following:
  * { id: Number, type: String, hintText: String }
  * The type key accepts: 'text', 'dropdowntext'
  * 
- * modelValues must depend on fields
+ * inputValues must depend on inputFields
  * 
  * modalType accepts: 'add', 'edit'
  * 
  * itemType accepts: 'product = 0', 'inventory = 1'
  */
 const props = defineProps({
-    fields: {
+    modalType: {
+        type: String,
+        default: 'add'
+    },
+    inputFields: {
         type: Array,
         required: true,
     },
-    modelValues: {
+    inputValues: {
         type: Object,
         required: true
     },
-    itemIDForEdit: {
+    itemRowID: {
         type: Number,
+    },
+    itemType: {
+        type: String,
     },
     modalTitle: {
         type: String,
         default: 'Modal Title'
     },
-    itemType: {
-        type: Number,
-        required: true
-    },
-    modalType: {
-        type: String,
-        default: 'add'
-    },
     modalSubmitText: {
         type: String,
         default: 'Submit'
     },
-    missingText: {
+    modalMissingInputText: {
         type: String,
         default: 'This is a missing text!'
     },
-    returnText: {
+    modalReturnText: {
         type: String,
         default: 'Return'
     },
@@ -158,8 +160,11 @@ const emits = defineEmits([
 const inputData = ref([]);
 const hasMissingInput = ref(false);
 
+// Variables for child
+const btnSubmitIconColor = ref('var(--color-primary)');
+
 // Initialise inputData
-Object.values(props.modelValues).forEach((item, index) => {
+Object.values(props.inputValues).forEach((item, index) => {
     let newInputData = {
         id: index + 1,
         value: item,
@@ -173,6 +178,12 @@ Object.values(props.modelValues).forEach((item, index) => {
 const resetButtonColor = ref('var(--color-accent)');
 
 // Function for child
+function changeButtonSubmitIconColor(isHovered) {
+    btnSubmitIconColor.value = isHovered ? 
+        'var(--color-secondary)' :
+        'var(--color-primary)';
+};
+
 function handleOnEnterFromResetButton() {
     resetButtonColor.value = 'var(--color-secondary)';
 };

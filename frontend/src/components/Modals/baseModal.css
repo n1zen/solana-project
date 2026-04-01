@@ -70,3 +70,7 @@
     align-items: center;
     justify-content: right;
 }
+
+.simple-modal__container #actions svg {
+    transition: 0.3s;
+}

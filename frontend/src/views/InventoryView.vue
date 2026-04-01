@@ -2,7 +2,7 @@
     <transition name="fade">
         <Overlay
             v-if="isOverlayCalled"
-            @on-click="reinitializeModalVariables"
+            @on-click="handleCloseModalRequest"
             >
             <template #sSurface>
                 <transition name="fade" mode="out-in">
@@ -11,18 +11,19 @@
                         modalType === 'add' ||
                         modalType === 'edit'
                         "
-                        :fields="modalAddEditFields"
-                        :model-values="modalModelValues"
-                        :modal-type="modalType"
-                        :itemType="1"
-                        :row-i-d-for-edit="activeTableRow"
-                        @on-cancel="reinitializeModalVariables"
-                        @on-submit="handleSubmitFromModal"
+                        modal-return-text="Cancel"
+                        :modal-title="modalTitle"
+                        :modal-missing-input-text="modalMissingInputText"
+                        :input-fields="modalInputFields"
+                        :input-values="modalInputValues"
+                        :item-row-i-d="activeTableRow"
+                        @on-cancel="handleCloseModalRequest"
+                        @on-submit=""
                     />
                     <MessageModal 
                         v-else-if="modalType === 'message'"
-                        :message="successfulMessage"
-                        @on-confirm="reinitializeModalVariables"
+                        :message="''"
+                        @on-confirm=""
                         >
                         <template #sMessageIcon>
                             <PackagePlus 
@@ -51,12 +52,9 @@
                         v-else-if="modalType === 'delete'"
                         text-title="inventory"
                         desc="This action will permanently delete this item."
-                        :item-i-d="deleteRowItemID"
-                        :item-name="deleteItemName"
-                        :items="deleteTableValues"
                         item-type="inventory"
-                        @on-cancel="reinitializeModalVariables"
-                        @on-confirm="handleSubmitFromModal"
+                        @on-cancel=""
+                        @on-confirm=""
                     />
                 </transition>
             </template>
@@ -68,31 +66,28 @@
                 <h1>Product Inventory</h1>
                 <div id="actions">
                     <PrimaryButton 
-                        text="New Inventory" 
+                        text="New Product" 
                         :has-icon="true"
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
                         @on-click="handleNewItemRequest"
                     >
                         <template #sIcon>
-                             <Plus 
+                            <Plus 
+                                id="addIcon"
                                 size="18"
                                 :color="btnAddIconColor"
-                             />
+                            />
                         </template>
                     </PrimaryButton>
                 </div>
             </section>
             <SimpleTable 
-                table-i-d="inventory"
-                :legends="legends"
-                :rows="inventory"
+                table-is-used-as="inventory"
+                :legends="tableLegends"
+                :rows="tableRows"
                 :table-state="tableState"
-                item-type="inventory"
-                table-state-text="Inventory"
-                @on-row-edit="handleTableRowEdit"
-                @on-row-delete="handleTableRowDelete"
-                @on-empty-add="handleNewItemRequest"
+                :table-state-texts="tableStateTexts"
             />
         </div>
     </div>
@@ -116,148 +111,107 @@ import DeleteModal from '@/components/Modals/DeleteModal.vue';
 // Modules
 import getAllInventory from '@/modules/inventory/getAllInventory';
 
-// Variables for inits
+// Use Modules
+import Templates from '@/modules/utils/useTemplates';
+
 const { inventory, error, load } = getAllInventory();
-const legends = [
-    { id: 'product-id', text: 'Product SKU' },
-    { id: 'name', text: 'Product Name' },
-    { id: 'quantity', text: 'Quantity' },
-    { id: 'actions', text: 'Actions' },
+const { tableRowTemplates } = Templates();
+const activeTableRow = ref(null);
+
+// Variables for Table
+const tableState = ref('default');
+const tableRows = ref([]);
+const tableLegends = [ // See SimpleTable.vue for template
+    'Product SKU',
+    'Product Name',
+    'Quantity',
+    'Actions'
 ];
-// Do see the SimpleAddEditModal.vue for field object
-const modalAddEditFields = [ // Change this later to inventory
-    { id: 1, type: 'dropdowntext',  hintText: 'Product SKU' },
-    { id: 3, type: 'text',  hintText: 'Description' },
-    { id: 4, type: 'text',  hintText: 'Quantity' },
-];
+const tableStateTexts = {
+    loading: 'Loading items from the server...',
+    offline: 'It seems that you are offline...',
+    empty: 'Inventory seems to be empty...' 
+}
 
 // Variables for Child
-const messageIcon = ref(null); // addIcon, editIcon, deleteIcon, messageIcon
-const modalType = ref(null); // add, edit, delete, message
-const isOverlayCalled = ref(false);
-const activeTableRow = ref(null);
-const successfulMessage = ref('');
-const deleteRowItemID = ref(null);
-const deleteItemName = ref(null);
-const tableState = ref('loading'); // default this to null
-const modalModelValues = reactive({
-    product_id: '',
-    details: '',
-    quantity: '',
-});
-const deleteTableValues = ref([
-    { legend: 'Product SKU', value: '' },
-    { legend: 'Product Name', value: '' },
-    { legend: 'Quantity', value: '' }
-]);
+// New Primary Button
+const btnAddIconColor = ref('var(--color-primary)');
 
-// Load data after mount
+// Overlays
+const isOverlayCalled = ref(false);
+
+// Modals
+const modalType = ref('');
+const modalTitle = ref('');
+const modalMissingInputText = ref('');
+const modalInputFields = ref([
+    { type: 'text', hint: 'Product SKU' },
+    { type: 'dropdowntext', hint: 'Product Name' },
+    { type: 'text', hint: 'Details' },
+    { type: 'text', hint: 'Quantity' },
+]);
+const modalInputValues = ref({
+    sku: '',
+    name: '',
+    category: '',
+    price: ''
+});
+
+// Initialize
 onMounted(() => {
     loadItems();
 });
 
-// Variables for children
-const btnAddIconColor = ref("#FFFAFA");
-
-// Function Appearances
-function changeButtonAddIconColor() {
-    btnAddIconColor.value = btnAddIconColor.value === '#FFFAFA' ? '#C84A46' : '#FFFAFA';
+// Function for Child
+// New Primary Button
+function changeButtonAddIconColor(isHovered) {
+    btnAddIconColor.value = isHovered ? 
+        'var(--color-secondary)' :
+        'var(--color-primary)';
 };
 
-function reinitializeModalVariables() {
-    isOverlayCalled.value = false;
-    successfulMessage.value = '';
-    modalType.value = null;
-    messageIcon.value = null;
-
-    Object.keys(modalModelValues).forEach(key => {
-        modalModelValues[key] = '';
-    });
+// Simple Table
+function handleTableRowOnClick(rowIndex) {
+    activeTableRow.value = rowIndex;
 };
 
 // Function Handlers
-// Opens the modal for edit
+function handleCloseModalRequest() {
+    isOverlayCalled.value = false;
+    modalType.value = '';
+    modalTitle.value = '';
+};
+
 function handleNewItemRequest() {
     isOverlayCalled.value = true;
-    modalType.value = 'add'
-    activeTableRow.value = null;
+    modalType.value = 'add';
+    modalTitle.value = 'Add new item';
 };
 
-// Opens the modal for edit
-function handleTableRowEdit(rowIndex) {
-    const inventoryItem = inventory.value[rowIndex];
-    
-    activeTableRow.value = rowIndex;
-    isOverlayCalled.value = true;
-    modalType.value = 'edit';
-
-    modalModelValues.product_id = inventoryItem.product?.sku;
-    modalModelValues.details = inventoryItem.details;
-    modalModelValues.quantity = inventoryItem.quantity;
-    
-    // use for debug
-    // console.log('==============')
-    // console.log('modalModelValues: ');
-    // console.log(modalModelValues.value);
-};
-
-function handleTableRowDelete(rowItemID, rowIndex) {
-    const inventoryItem = inventory.value[rowIndex];
-    
-    deleteRowItemID.value = rowItemID;
-    activeTableRow.value = rowIndex;
-    isOverlayCalled.value = true;
-    modalType.value = 'delete';
-
-    const itemValues = [
-        inventoryItem.id,
-        inventoryItem.product?.name,
-        inventoryItem.quantity,
-    ]
-    
-    deleteTableValues.value.forEach((item, index) => {
-        item.value = itemValues[index];
-    });
-
-    deleteItemName.value = itemValues[1];
-};
-
-// Handle successful add/edit submission from modal
-async function handleSubmitFromModal(hasNoChangesOnEdit = false) {
-    const item = inventory.value[activeTableRow.value];
-    const itemName = item.product?.name
-
-    const messageTemplates = {
-        add: `${ itemName } has been added successfully!`,
-        edit: `${ itemName } has been updated successfully!`,
-        delete: `${ itemName } has been removed successfully!`,
-    };
-
-    console.log(item);
-
-    if (hasNoChangesOnEdit) messageIcon.value = 'noChangesIcon';
-    else messageIcon.value = `${ modalType.value }Icon`;
-
-    successfulMessage.value = messageTemplates[modalType.value];
-    modalType.value = 'message';
-
-    loadItems();
-};
-
-// Function reusables
+// Functions Reusable
 async function loadItems() {
     tableState.value = 'loading';
-
     await load();
 
-    if (error.value === null) {
-        const inventoryLength = inventory.value.length
-        
-        tableState.value = inventoryLength === 0 ? 'empty' : 'exist';
+    if (error.value === null && inventory.value.length !== 0) {
+        inventory.value.forEach((item, rowIndex) => {
+            // inventory is an object containing a inventory's data
+
+            let newTableRow = tableRowTemplates(
+                'inventory',
+                rowIndex,
+                item
+            );
+
+            tableRows.value.push(newTableRow);
+            tableState.value = 'default';
+        });
     } else {
         tableState.value = 'empty';
+        console.log('ahsdkajsd');
     };
 };
+
 </script>
 
 <style scoped>

@@ -20,7 +20,7 @@ const route = useRoute();
 const isTest = ref(false);
 
 watch(() => route.path, (newPath, oldPath) => {
-  console.log('Changement de page :', oldPath, '→', newPath);
+  // console.log('Changement de page :', oldPath, '→', newPath);
   isTest.value = newPath === '/test';
 });
 </script>

@@ -7,8 +7,8 @@
             }" 
             :class="{ 'with-icon': hasIcon }"
             @click="handleClick"
-            @mouseenter="isHovered = true; handleOnHover()"
-            @mouseleave="isHovered = false; handleOnLeave()"
+            @mouseenter="handleOnHover"
+            @mouseleave="handleOnLeave"
             >
             <div id="icon" v-if="hasIcon">
                 <slot name="sIcon"></slot>
@@ -62,11 +62,13 @@ function handleClick() {
 }
 
 function handleOnHover() {
-    emits('onHover')
+    isHovered.value = true;
+    emits('onHover', isHovered.value)
 }
 
 function handleOnLeave() {
-    emits('onLeave')
+    isHovered.value = false;
+    emits('onLeave', isHovered.value);
 }
 </script>
 
