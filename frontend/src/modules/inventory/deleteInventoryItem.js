@@ -18,6 +18,7 @@ const deleteInventoryItem = (id) => {
                 throw Error(message);
             }
 
+            console.log(response.json());
             // alert('Product deleted successfully');
         } catch (err) {
             error.value = err.message;

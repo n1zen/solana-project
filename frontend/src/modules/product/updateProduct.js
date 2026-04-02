@@ -20,7 +20,7 @@ const updateProduct = (updatedProduct) => {
                 throw Error(message);
             }
 
-            // alert('Product edited successfully');
+            return response.json();
         } catch (err) {
             error.value = err.message;
             // alert(error.value);

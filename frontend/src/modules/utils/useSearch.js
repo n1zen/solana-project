@@ -47,18 +47,23 @@ const Search = (type) => {
         };
     };
 
+    const refreshSearchData = async () => await loader();
+
     /**
      * @param { String } id - The id to be searched  
+     * @param { String } whatToGet - The value to be returned (Eg. getAll)
      */
-    const searchById = (id) => {
+    const searchById = (id, whatToGet) => {
         const data = dataFromServer.value;
 
         const searchConfig = {
             product: {
+                getAll: (datum) => datum,
                 getId: (datum) => datum.sku,
                 getName: (datum) => datum.name
             },
             inventory: {
+                getAll: (datum) => datum,
                 getId: (datum) => datum.product?.sku,
                 getName: (datum) => datum.product?.name
             },
@@ -69,15 +74,51 @@ const Search = (type) => {
         };
 
         const config = searchConfig[type];
+        const toReturn = config[whatToGet]
         if (!config) return;
 
         for (const datum of data) {
-            if (config.getId(datum) == id) return config.getName(datum);
+            if (config.getId(datum) == id) return toReturn(datum);
+        };
+    };
+
+    /**
+     * @param { String } name - The name to be searched  
+     * @param { String } whatToGet - The value to be returned (Eg. getAll)
+     */
+    const searchByName = (name, whatToGet) => {
+        const data = dataFromServer.value;
+
+        const searchConfig = {
+            product: {
+                getAll: (datum) => datum,
+                getId: (datum) => datum.sku,
+                getName: (datum) => datum.name
+            },
+            inventory: {
+                getAll: (datum) => datum,
+                getId: (datum) => datum.product?.sku,
+                getName: (datum) => datum.product?.name
+            },
+            // orders: {
+            //     getId: (datum) => datum.order_number,
+            //     getName: (datum) => datum.customer_name
+            // }
+        };
+
+        const config = searchConfig[type];
+        const toReturn = config[whatToGet]
+        if (!config) return;
+
+        for (const datum of data) {
+            if (config.getId(datum) == name) return toReturn(datum);
         };
     };
 
     return {
-        searchById
+        refreshSearchData,
+        searchById,
+        searchByName
     };
 };
 

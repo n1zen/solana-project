@@ -77,6 +77,9 @@ const props = defineProps({
     itemID: {
         type: Number,
     },
+    itemRowIndex: {
+        type: Number
+    },
     itemType: {
         type: String
     },
@@ -119,7 +122,7 @@ async function handleOnConfirm() {
             Object.assign(deletedValues, { [key]: value });
         });
 
-        emits('onConfirm', deletedValues);
+        emits('onConfirm', deletedValues, props.itemRowIndex);
     } else {
         // add a catcher if possible
     };

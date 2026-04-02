@@ -119,7 +119,7 @@ import Search from '@/modules/utils/useSearch';
  * 
  * modalType accepts: 'add', 'edit'
  * 
- * itemType accepts: 'product = 0', 'inventory = 1'
+ * itemType accepts: 'product', 'inventory'
  */
 const props = defineProps({
     modalType: {
@@ -138,7 +138,10 @@ const props = defineProps({
         type: [ Number, String ],
     },
     itemType: {
-        type: Number,
+        type: String,
+    },
+    searchFor: {
+        type: String
     },
     modalTitle: {
         type: String,
@@ -163,13 +166,13 @@ const emits = defineEmits([
     'onSubmit'
 ]);
 
-const itemTypeTranslator = [
-    'product',
-    'inventory'
-]
+// const itemTypeTranslator = [
+//     'product',
+//     'inventory'
+// ]
 
-const itemTypeTranslated = ref(itemTypeTranslator[props.itemType]);
-const { searchById } = Search(itemTypeTranslated.value);
+// const itemTypeTranslated = ref(itemTypeTranslator[props.itemType]);
+const { searchById, searchByName } = Search(props.searchFor);
 const hasMissingInput = ref(false);
 const inputData = ref({});
 
@@ -212,11 +215,18 @@ function handleOnInputFromSimpleInputs(childObj) {
     const key = childObj?.dataKey;
     const newValue = childObj?.newValue;
 
+    // console.log(childObj);
+
     inputData.value[key].value = newValue;
     inputData.value[key].state = newValue === '' ? 'default' : 'valid';
 
-    if (childObj.linkedField !== undefined) {
-        const searchedItem = searchById(newValue);
+    if (childObj.linkedField === 'product_name') {
+        const searchedItem = searchById(newValue, 'getName');
+
+        inputData.value[childObj.linkedField].value = searchedItem;
+        inputData.value[childObj.linkedField].state = searchedItem === undefined ? 'default' : 'valid';
+    } else if (childObj.linkedField === 'product_sku') {
+        const searchedItem = searchByName(newValue, 'getId');
 
         inputData.value[childObj.linkedField].value = searchedItem;
         inputData.value[childObj.linkedField].state = searchedItem === undefined ? 'default' : 'valid';
@@ -259,14 +269,15 @@ async function handleOnSubmit() {
         }
     };
 
-    const submitTemplate = submitTemplates[itemTypeTranslated];
+    const submitTemplate = submitTemplates[props.itemType];
     
     Object.keys(submitTemplate).forEach((key) => {
         submitTemplate[key] = inputData.value[key].value;
     });
     
     if (props.modalType === 'edit') {
-        const id = props.itemID // The plus one here is for the server
+        // id is the key required to find the corresponding item in the db
+        const id = props.itemID;
         
         Object.assign(submitTemplate, { id });
     };
@@ -275,15 +286,16 @@ async function handleOnSubmit() {
     // console.log('submitTemplate:');
     // console.log(submitTemplate);
     
-    const modules = addEditTypes[itemTypeTranslated];
+    const modules = addEditTypes[props.itemType];
     const action = props.modalType === 'add' ? modules.add : modules.edit
     const { error, onSubmit } = action(submitTemplate);
-
-    await onSubmit();
+    const response = await onSubmit();
 
     if (error.value === null) {
-        emits('onSubmit', submitTemplate);
+        emits('onSubmit', response);
+
         inputData.value = {};
+        
         // use for debug
         // console.log('==============')
         // console.log('submitTemplate: ');

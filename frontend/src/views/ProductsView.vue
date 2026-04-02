@@ -19,7 +19,7 @@
                         :input-values="modalInputValues"
                         :item-row-i-d="activeTableRow"
                         :item-i-d="modalItemID"
-                        :item-type="0"
+                        item-type="product"
                         @on-cancel="handleCloseModalRequest"
                         @on-submit="handleOnSubmitSuccess"
                     />
@@ -250,12 +250,10 @@ function handleOnDeleteItemRequest(rowIndex) {
 };
 
 function handleOnSubmitSuccess(submittedValues, noChanges = false) {
-    
     messageModalMessage.value = messageTemplates(
         'product',
         modalType.value,
         submittedValues,
-        'sku'
     );
 
     if (modalType.value === 'add') {

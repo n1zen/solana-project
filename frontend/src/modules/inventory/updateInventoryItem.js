@@ -19,6 +19,8 @@ const updateInventoryItem = (inventoryItem) => {
                     : data.detail.map(e => e.msg).join(', ');
                 throw Error(message);
             }
+
+            return response.json();
         } catch (err) {
             error.value = err.message;
             console.error(err.message);

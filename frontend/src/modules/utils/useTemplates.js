@@ -30,22 +30,22 @@ const Templates = () => {
         return rowTemplate;
     };
 
-    const messageTemplates = (type, messageType, data, key) => {
+    const messageTemplates = (type, messageType, data) => {
         let messageTemplate = {}
 
         if (type === 'product') {
             const messageTemplates = {
-                add: `Product ${ data[key] } has been added successfully!`,
-                edit: `Product ${ data[key] } has been updated successfully!`,
-                delete: `Product ${ data[key] } has been deleted successfully!`
+                add: `SKU ${ data?.sku } - ${ data?.name } has been added successfully!`,
+                edit: `SKU ${ data?.sku } - ${ data?.name } has been updated successfully!`,
+                delete: `SKU ${ data?.sku } - ${ data?.name }  has been deleted successfully!`
             }
 
             messageTemplate = messageTemplates[messageType];
         } else if (type === 'inventory') {
             const messageTemplates = {
-                add: `Product ${ data[key] } has been added to inventory!`,
-                edit: `Product ${ data[key] } has been updated successfully!`,
-                delete: `Product ${ data[key] } has been deleted from the inventory!`
+                add: `SKU ${ data?.product.sku } - ${ data?.product.name } has been added to inventory!`,
+                edit: `SKU ${ data?.product.sku } - ${ data?.product.name } has been updated successfully!`,
+                delete: `SKU ${ data?.product.sku } - ${ data?.product.name } has been deleted from the inventory!`
             }
 
             messageTemplate = messageTemplates[messageType];

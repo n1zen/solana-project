@@ -102,6 +102,7 @@ header {
 
 .message {
     color: var(--color-accent);
+    line-height: 20px;
     text-align: center;
 }
 

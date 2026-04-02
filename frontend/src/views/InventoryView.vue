@@ -19,7 +19,9 @@
                         :input-values="modalInputValues"
                         :item-row-i-d="activeTableRow"
                         :item-i-d="modalItemID"
-                        :item-type="1"
+                        :item-row-index="activeTableRow"
+                        item-type="inventory"
+                        :search-for="searchFor"
                         @on-cancel="handleCloseModalRequest"
                         @on-submit="handleOnSubmitSuccess"
                     />
@@ -57,6 +59,7 @@
                         item-type="inventory"
                         :table-values="deleteModalTableValues"
                         :item-i-d="modalItemID"
+                        :item-row-index="activeTableRow"
                         @on-cancel="handleCloseModalRequest"
                         @on-confirm="handleOnSubmitSuccess"
                     />
@@ -67,10 +70,10 @@
     <div class="page" id="page-inventory">
         <div id="inventory">
             <section id="header">
-                <h1>Product Inventory</h1>
+                <h1>Inventory</h1>
                 <div id="actions">
                     <PrimaryButton 
-                        text="New Product" 
+                        text="New Inventory" 
                         :has-icon="true"
                         @on-hover="changeButtonAddIconColor"
                         @on-leave="changeButtonAddIconColor"
@@ -107,7 +110,7 @@
 import { FilePen, PackageCheck, PackagePlus, PackageX, Plus } from 'lucide-vue-next';
 
 // Vue
-import { onMounted, reactive, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 
 // Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
@@ -127,6 +130,7 @@ const { inventory, error, load } = getAllInventory();
 const { tableRowTemplates, messageTemplates } = Templates();
 const activeTableRow = ref(null);
 const wasModalAddType = ref(false);
+const searchFor = ref('');
 
 // Variables for Table
 const tableState = ref('default');
@@ -157,7 +161,7 @@ const modalMissingInputText = ref('');
 const modalItemID = ref('');
 const modalInputFields = ref({
     product_sku: { type: 'text', linkedField: 'product_name', hint: 'Product SKU' },
-    product_name: { type: 'dropdowntext', linkedField: 'product_name', hint: 'Product Name' },
+    product_name: { type: 'dropdowntext', linkedField: 'product_sku', hint: 'Product Name' },
     details: { type: 'text', hint: 'Details' },
     quantity: { type: 'text', hint: 'Quantity' },
 });
@@ -203,6 +207,7 @@ function handleCloseModalRequest() {
     isOverlayCalled.value = false;
     modalType.value = '';
     modalTitle.value = '';
+    searchFor.value = '';
 
     Object.keys(modalInputValues.value).forEach(key => {
         modalInputValues.value[key] = '';
@@ -215,6 +220,8 @@ function handleNewItemRequest() {
     isOverlayCalled.value = true;
     modalType.value = 'add';
     modalTitle.value = 'Add new item';
+    searchFor.value = 'product';
+    activeTableRow.value = undefined;
 };
 
 function handleOnEditItemRequest(rowIndex) {
@@ -228,6 +235,7 @@ function handleOnEditItemRequest(rowIndex) {
     modalType.value = 'edit';
     modalTitle.value = `Edit Product ${ modalInputValues.value.sku }`;
     modalItemID.value = tableRowToEdit.id;
+    searchFor.value = 'product';
 };
 
 function handleOnDeleteItemRequest(rowIndex) {
@@ -244,11 +252,10 @@ function handleOnDeleteItemRequest(rowIndex) {
 };
 
 function handleOnSubmitSuccess(submittedValues, noChanges = false) {
-    messageModalMessage.value = messageTemplates(
+     messageModalMessage.value = messageTemplates(
         'inventory',
         modalType.value,
         submittedValues,
-        'product_sku'
     );
 
     if (modalType.value === 'add') {
