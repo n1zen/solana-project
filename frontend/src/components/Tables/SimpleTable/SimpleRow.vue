@@ -42,7 +42,6 @@
 <script setup>
 // Imports outside
 import { SquarePen, SquareX } from 'lucide-vue-next';
-import { reactive, ref } from 'vue';
 
 // Vue
 
@@ -50,13 +49,15 @@ import { reactive, ref } from 'vue';
 /**
  * See SimpleTable.vue for more information
  */
-const props= defineProps({
+import { computed } from 'vue';
+
+const props = defineProps({
     tableIsUsedAs: {
         type: String
     },
     rowData: {
         type: Object,
-        default: {}
+        default: () => ({})
     },
     isCurrentlyClicked: {
         type: Boolean,
@@ -68,42 +69,30 @@ const emits = defineEmits([
     'onClick',
     'onEdit',
     'onDelete'
-])
+]);
 
-const rowTemplate = ref(null);
+const rowTemplate = computed(() => {
+    if (props.tableIsUsedAs === 'products') {
+        return {
+            sku: props.rowData.sku,
+            name: props.rowData.name,
+            category: props.rowData.category,
+            price: props.rowData.price,
+            id: props.rowData.id
+        };
+    }
 
-const productDataRowTemplate = reactive({
-    sku: '',
-    name: '',
-    category: '',
-    price: '',
-    id: ''
+    if (props.tableIsUsedAs === 'inventory') {
+        return {
+            product_sku: props.rowData.product_sku,
+            product_name: props.rowData.product_name,
+            quantity: props.rowData.quantity,
+            id: props.rowData.id
+        };
+    }
+
+    return {};
 });
-
-const inventoryDataRowTemplate = reactive({
-    product_sku: '',
-    product_name: '',
-    quantity: '',
-    id: ''
-});
-
-if (props.tableIsUsedAs === 'products') {
-    const datum = props.rowData;
-    
-    Object.keys(productDataRowTemplate).forEach(key => {
-        productDataRowTemplate[key] = datum[key];
-    });
-    
-    rowTemplate.value = productDataRowTemplate;
-} else if (props.tableIsUsedAs === 'inventory') {
-    const datum = props.rowData;
-    
-    Object.keys(inventoryDataRowTemplate).forEach(key => {
-        inventoryDataRowTemplate[key] = datum[key];
-    });
-
-    rowTemplate.value = inventoryDataRowTemplate;
-};
 
 // Function Handlers
 function handleOnClick() {
@@ -125,7 +114,7 @@ td {
     color: var(--color-accent);
     cursor: pointer;
     font-weight: bold;
-    padding: 20px 10px;
+    padding: 13px 10px;
     transition: 0.3s;
 }
 

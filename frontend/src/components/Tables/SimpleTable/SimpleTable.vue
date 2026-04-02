@@ -56,7 +56,7 @@
                 </div>
                 <SimpleRow 
                     v-for="(row, index) in rows"
-                    :key="index"
+                    :key="row.rowIndex"
                     :row-data="row"
                     :table-is-used-as="tableIsUsedAs"
                     :is-currently-clicked="clickedRowIndex === index"
@@ -79,7 +79,6 @@ import { ref, watch } from 'vue';
 
 // Components
 import PrimaryButton from '@/components/Buttons/PrimaryButton.vue';
-
 
 // Personal Variables
 /**

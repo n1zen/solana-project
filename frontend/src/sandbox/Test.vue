@@ -4,8 +4,8 @@
         <!-- <Nav /> -->
         <!-- <NavButton /> -->
         <!-- <PrimaryButton /> -->
-        <Overlay>
-            <template #sSurface>
+        <!-- <Overlay>
+            <template #sSurface> -->
                 <!-- <DeleteModal 
                     textTitle="product"
                     desc="This action will permanently delete this product."
@@ -24,7 +24,7 @@
                         />
                     </template>
                 </MessageModal> -->
-                <SimpleAddEditModal 
+                <!-- <SimpleAddEditModal 
                     modalType="edit"
                     modalSubmitText="Add Product"
                     :fields="[
@@ -57,7 +57,7 @@
                     ]"
                 />
             </template>
-        </Overlay>
+        </Overlay> -->
         <!-- <BasicTextInput 
             hint="SKU ID*"
         /> -->
@@ -85,6 +85,7 @@
             hintText="SKU ID"
             dangerText="I am in danger!"
         /> -->
+        <SearchInput />
     </div>  
 </template>
 
@@ -100,14 +101,15 @@ import { PackageCheck } from 'lucide-vue-next';
 import SimpleTextInput from '@/components/Inputs/SimpleTextInput.vue';
 import SimpleDropdownInput from '@/components/Inputs/SimpleDropdownInput.vue';
 import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
+import SearchInput from '@/components/Inputs/SearchInput.vue';
 </script>
 
 <style scoped>
 #test {
     background-color: var(--color-primary);
     width: 100%;
-    /* margin-top: 50px;
-    margin-left: 50px; */
+    margin-top: 50px;
+    margin-left: 50px;
     
     display: flex;
     position: relative;

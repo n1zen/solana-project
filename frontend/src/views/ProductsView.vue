@@ -86,6 +86,12 @@
                     </PrimaryButton>
                 </div>
             </section>
+            <div class="filters-and-searches">
+                <SearchInput 
+                    item-type="product"
+                    @on-input="handleSearchRequest"
+                />
+            </div>
             <SimpleTable 
                 table-is-used-as="products"
                 :legends="tableLegends"
@@ -116,6 +122,7 @@ import Overlay from '@/components/Modals/Overlay.vue';
 import MessageModal from '@/components/Modals/MessageModal.vue';
 import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
 import DeleteModal from '@/components/Modals/DeleteModal.vue';
+import SearchInput from '@/components/Inputs/SearchInput.vue';
 
 // Modules
 import getAllProducts from '@/modules/product/getAllProducts';
@@ -265,6 +272,21 @@ function handleOnSubmitSuccess(submittedValues, noChanges = false) {
     else messageModalIcon.value = 'noChangesIcon';
 
     modalType.value = 'message';
+};
+
+function handleSearchRequest(results) {
+    tableRows.value = [];
+
+    results.forEach((result, rowIndex) => {
+        let newTableRow = tableRowTemplates(
+            'product', 
+            rowIndex,
+            result
+        );
+
+        tableRows.value.push(newTableRow);
+        tableState.value = 'default';
+    });
 };
 
 // Functions Reusable

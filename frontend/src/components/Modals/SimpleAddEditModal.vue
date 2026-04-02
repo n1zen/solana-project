@@ -2,13 +2,8 @@
     <div id="simple-modal" @click.stop="">
         <div class="simple-modal__container">
             <section id="return">
-                <button
-                    type="button"
-                    @click="handleOnCancel"
-                    >
-                    <ArrowLeft 
-                        size="10"
-                    />
+                <button type="button" @click="handleOnCancel">
+                    <ArrowLeft size="10" />
                     <p class="return-text">{{ modalReturnText }}</p>
                 </button>
             </section>
@@ -19,64 +14,28 @@
                 Progress
             </section>
             <form class="simple-modal__form" action="" method="post" @submit.prevent="">
-                <div 
-                    class="input-type"
-                    v-for="(value, key, index) in inputFields"
-                    >
-                    <SimpleTextInput 
-                        v-if="value.type === 'text'"
-                        :has-hint="true"
-                        :hint-text="value.hint"
-                        :data="inputData[key]"
-                        :data-key="key"
-                        :linked-field="value?.linkedField"
-                        @on-input="handleOnInputFromSimpleInputs"
-                        />
-                    <SimpleDropdownInput 
-                        v-else-if="value.type === 'dropdowntext'"
-                        :has-hint="true"
-                        :hint-text="value.hint"
-                        :data="inputData[key]"
-                        :data-key="key"
-                        :linked-field="value?.linkedField"
-                        @on-input="handleOnInputFromSimpleInputs"
-                    />
+                <div class="input-type" v-for="(value, key, index) in inputFields">
+                    <SimpleTextInput v-if="value.type === 'text'" :has-hint="true" :hint-text="value.hint"
+                        :data="inputData[key]" :data-key="key" :linked-field="value?.linkedField"
+                        @on-input="handleOnInputFromSimpleInputs" />
+                    <SimpleDropdownInput v-else-if="value.type === 'dropdowntext'" :has-hint="true"
+                        :hint-text="value.hint" :data="inputData[key]" :data-key="key"
+                        :linked-field="value?.linkedField" @on-input="handleOnInputFromSimpleInputs" />
                 </div>
             </form>
             <section id="bottom">
-                <div 
-                    id="missing-container"
-                    v-if="hasMissingInput"
-                    >
+                <div id="missing-container" v-if="hasMissingInput">
                     {{ modalMissingInputText }}
                 </div>
                 <div id="actions">
-                    <NudeButton 
-                        text="Reset"
-                        :txt-color="resetButtonColor"
-                        @on-click=""
-                        @on-mouse-enter="handleOnEnterFromResetButton"
-                        @on-mouse-leave="handleOnLeaveFromResetButton"
-                    />
-                    <PrimaryButton
-                        id="submit-button"
-                        :text="modalSubmitText"
-                        :has-icon="true"
-                        @on-hover="changeButtonSubmitIconColor"
-                        @on-leave="changeButtonSubmitIconColor"
-                        @on-click="handleOnSubmit"
-                    >
+                    <NudeButton text="Reset" :txt-color="resetButtonColor" @on-click=""
+                        @on-mouse-enter="handleOnEnterFromResetButton" @on-mouse-leave="handleOnLeaveFromResetButton" />
+                    <PrimaryButton id="submit-button" :text="modalSubmitText" :has-icon="true"
+                        @on-hover="changeButtonSubmitIconColor" @on-leave="changeButtonSubmitIconColor"
+                        @on-click="handleOnSubmit">
                         <template #sIcon>
-                            <Plus 
-                                v-if="modalType === 'add'"
-                                size="16"
-                                :color="btnSubmitIconColor"
-                                />
-                            <SquarePen 
-                                v-else
-                                size="16"
-                                :color="btnSubmitIconColor"
-                            />
+                            <Plus v-if="modalType === 'add'" size="16" :color="btnSubmitIconColor" />
+                            <SquarePen v-else size="16" :color="btnSubmitIconColor" />
                         </template>
                     </PrimaryButton>
                 </div>
@@ -107,7 +66,7 @@ import PrimaryButton from '../Buttons/PrimaryButton.vue';
 // Modules
 
 // Use Modules
-import Search from '@/modules/utils/useSearch';
+import SearchItem from '@/modules/utils/useSearch';
 
 // Variables for inits
 /**
@@ -135,7 +94,7 @@ const props = defineProps({
         required: true
     },
     itemID: {
-        type: [ Number, String ],
+        type: [Number, String],
     },
     itemType: {
         type: String,
@@ -172,7 +131,7 @@ const emits = defineEmits([
 // ]
 
 // const itemTypeTranslated = ref(itemTypeTranslator[props.itemType]);
-const { searchById, searchByName } = Search(props.searchFor);
+const { searchById, searchByName } = SearchItem(props.searchFor);
 const hasMissingInput = ref(false);
 const inputData = ref({});
 
@@ -197,7 +156,7 @@ const resetButtonColor = ref('var(--color-accent)');
 
 // Function for child
 function changeButtonSubmitIconColor(isHovered) {
-    btnSubmitIconColor.value = isHovered ? 
+    btnSubmitIconColor.value = isHovered ?
         'var(--color-secondary)' :
         'var(--color-primary)';
 };
@@ -214,22 +173,29 @@ function handleOnLeaveFromResetButton() {
 function handleOnInputFromSimpleInputs(childObj) {
     const key = childObj?.dataKey;
     const newValue = childObj?.newValue;
-
-    // console.log(childObj);
+    const linkedField = childObj?.linkedField;
 
     inputData.value[key].value = newValue;
     inputData.value[key].state = newValue === '' ? 'default' : 'valid';
 
-    if (childObj.linkedField === 'product_name') {
-        const searchedItem = searchById(newValue, 'getName');
+    const linkedFieldConfig = {
+        product_name: {
+            searchFn: searchById,
+            returnField: 'name'
+        },
+        product_sku: {
+            searchFn: searchByName,
+            returnField: 'id'
+        }
+    };
 
-        inputData.value[childObj.linkedField].value = searchedItem;
-        inputData.value[childObj.linkedField].state = searchedItem === undefined ? 'default' : 'valid';
-    } else if (childObj.linkedField === 'product_sku') {
-        const searchedItem = searchByName(newValue, 'getId');
+    const config = linkedFieldConfig[linkedField];
 
-        inputData.value[childObj.linkedField].value = searchedItem;
-        inputData.value[childObj.linkedField].state = searchedItem === undefined ? 'default' : 'valid';
+    if (config) {
+        const searchedItem = config.searchFn(newValue, config.returnField);
+
+        inputData.value[linkedField].value = searchedItem;
+        inputData.value[linkedField].state = searchedItem === undefined ? 'default' : 'valid';
     };
 };
 
@@ -270,22 +236,22 @@ async function handleOnSubmit() {
     };
 
     const submitTemplate = submitTemplates[props.itemType];
-    
+
     Object.keys(submitTemplate).forEach((key) => {
         submitTemplate[key] = inputData.value[key].value;
     });
-    
+
     if (props.modalType === 'edit') {
         // id is the key required to find the corresponding item in the db
         const id = props.itemID;
-        
+
         Object.assign(submitTemplate, { id });
     };
 
     // console.log('==============')
     // console.log('submitTemplate:');
     // console.log(submitTemplate);
-    
+
     const modules = addEditTypes[props.itemType];
     const action = props.modalType === 'add' ? modules.add : modules.edit
     const { error, onSubmit } = action(submitTemplate);
@@ -295,7 +261,7 @@ async function handleOnSubmit() {
         emits('onSubmit', response);
 
         inputData.value = {};
-        
+
         // use for debug
         // console.log('==============')
         // console.log('submitTemplate: ');

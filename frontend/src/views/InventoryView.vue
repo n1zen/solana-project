@@ -89,6 +89,12 @@
                     </PrimaryButton>
                 </div>
             </section>
+            <div class="filters-and-searches">
+                <SearchInput 
+                    item-type="inventory"
+                    @on-input="handleSearchRequest"
+                />
+            </div>
             <SimpleTable 
                 table-is-used-as="inventory"
                 :legends="tableLegends"
@@ -119,6 +125,7 @@ import Overlay from '@/components/Modals/Overlay.vue';
 import MessageModal from '@/components/Modals/MessageModal.vue';
 import SimpleAddEditModal from '@/components/Modals/SimpleAddEditModal.vue';
 import DeleteModal from '@/components/Modals/DeleteModal.vue';
+import SearchInput from '@/components/Inputs/SearchInput.vue';
 
 // Modules
 import getAllInventory from '@/modules/inventory/getAllInventory';
@@ -161,7 +168,7 @@ const modalMissingInputText = ref('');
 const modalItemID = ref('');
 const modalInputFields = ref({
     product_sku: { type: 'text', linkedField: 'product_name', hint: 'Product SKU' },
-    product_name: { type: 'dropdowntext', linkedField: 'product_sku', hint: 'Product Name' },
+    product_name: { type: 'text', linkedField: 'product_sku', hint: 'Product Name' },
     details: { type: 'text', hint: 'Details' },
     quantity: { type: 'text', hint: 'Quantity' },
 });
@@ -267,6 +274,21 @@ function handleOnSubmitSuccess(submittedValues, noChanges = false) {
     else messageModalIcon.value = 'noChangesIcon';
 
     modalType.value = 'message';
+};
+
+function handleSearchRequest(results) {
+    tableRows.value = [];
+
+    results.forEach((result, rowIndex) => {
+        let newTableRow = tableRowTemplates(
+            'inventory', 
+            rowIndex,
+            result
+        );
+
+        tableRows.value.push(newTableRow);
+        tableState.value = 'default';
+    });
 };
 
 // Functions Reusable
