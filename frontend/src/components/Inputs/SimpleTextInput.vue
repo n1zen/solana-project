@@ -48,6 +48,9 @@ const props = defineProps({
     dataKey: {
         type: String
     },
+    linkedField: {
+        type: String
+    },
     hasHint: {
         type: Boolean,
         default: true
@@ -75,9 +78,10 @@ watch(() => props.data?.value, (newValue) => {
 // Function handler
 function handleOnInput() {
     emits('onInput', {
-        // refID: props.data?.id,
         dataKey: props.dataKey,
-        newValue: modelValue.value
+        newValue: modelValue.value,
+        linkedField: props.linkedField,
+        // itemIdForSearch: props.data?.itemID
     });
 };
 </script>

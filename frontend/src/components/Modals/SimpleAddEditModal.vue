@@ -29,6 +29,7 @@
                         :hint-text="value.hint"
                         :data="inputData[key]"
                         :data-key="key"
+                        :linked-field="value?.linkedField"
                         @on-input="handleOnInputFromSimpleInputs"
                         />
                     <SimpleDropdownInput 
@@ -37,6 +38,7 @@
                         :hint-text="value.hint"
                         :data="inputData[key]"
                         :data-key="key"
+                        :linked-field="value?.linkedField"
                         @on-input="handleOnInputFromSimpleInputs"
                     />
                 </div>
@@ -105,6 +107,7 @@ import PrimaryButton from '../Buttons/PrimaryButton.vue';
 // Modules
 
 // Use Modules
+import Search from '@/modules/utils/useSearch';
 
 // Variables for inits
 /**
@@ -160,8 +163,15 @@ const emits = defineEmits([
     'onSubmit'
 ]);
 
-const inputData = ref({});
+const itemTypeTranslator = [
+    'product',
+    'inventory'
+]
+
+const itemTypeTranslated = ref(itemTypeTranslator[props.itemType]);
+const { searchById } = Search(itemTypeTranslated.value);
 const hasMissingInput = ref(false);
+const inputData = ref({});
 
 // Variables for child
 const btnSubmitIconColor = ref('var(--color-primary)');
@@ -172,22 +182,12 @@ Object.keys(props.inputValues).forEach((key, index) => {
 
     Object.assign(inputData.value, {
         [key]: {
-            id: index + 1,
+            // itemID: props.itemID,
             value: item,
             state: item === '' ? 'default' : 'valid'
         }
     });
 });
-
-// Object.values(props.inputValues).forEach((item, index) => {
-//     let newInputData = {
-//         id: index + 1,
-//         value: item,
-//         state: item === '' ? 'default' : 'valid'
-//     };
-
-//     inputData.value.push(newInputData);
-// });
 
 // Variables for appearance
 const resetButtonColor = ref('var(--color-accent)');
@@ -214,6 +214,13 @@ function handleOnInputFromSimpleInputs(childObj) {
 
     inputData.value[key].value = newValue;
     inputData.value[key].state = newValue === '' ? 'default' : 'valid';
+
+    if (childObj.linkedField !== undefined) {
+        const searchedItem = searchById(newValue);
+
+        inputData.value[childObj.linkedField].value = searchedItem;
+        inputData.value[childObj.linkedField].state = searchedItem === undefined ? 'default' : 'valid';
+    };
 };
 
 function handleOnCancel() {
@@ -221,38 +228,38 @@ function handleOnCancel() {
 };
 
 async function handleOnSubmit() {
-    const submitTemplates = [
-        { // Products = 0
+    const submitTemplates = {
+        product: { // Products = 0
             sku: 0,
             name: 'Product Name',
             category: 'Category',
             price: 0,
         },
-        { // Inventory = 1
+        inventory: { // Inventory = 1
             product_sku: 0,
             details: '',
             quantity: 0
         },
-        { // Orders = 2
+        order: { // Orders = 2
 
         }
-    ];
+    };
 
-    const addEditTypes = [
-        { // Product = 0
+    const addEditTypes = {
+        product: { // Product = 0
             add: addProduct,
             edit: updateProduct
         },
-        { // Inventory = 1
+        inventory: { // Inventory = 1
             add: addInventoryItem,
             edit: updateInventoryItem
         },
-        { // Orders = 2
+        order: { // Orders = 2
 
         }
-    ];
+    };
 
-    const submitTemplate = submitTemplates[props.itemType];
+    const submitTemplate = submitTemplates[itemTypeTranslated];
     
     Object.keys(submitTemplate).forEach((key) => {
         submitTemplate[key] = inputData.value[key].value;
@@ -268,7 +275,7 @@ async function handleOnSubmit() {
     // console.log('submitTemplate:');
     // console.log(submitTemplate);
     
-    const modules = addEditTypes[props.itemType];
+    const modules = addEditTypes[itemTypeTranslated];
     const action = props.modalType === 'add' ? modules.add : modules.edit
     const { error, onSubmit } = action(submitTemplate);
 

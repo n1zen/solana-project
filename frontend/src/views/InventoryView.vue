@@ -156,8 +156,8 @@ const modalTitle = ref('');
 const modalMissingInputText = ref('');
 const modalItemID = ref('');
 const modalInputFields = ref({
-    product_sku: { type: 'text', hint: 'Product SKU' },
-    product_name: { type: 'dropdowntext', hint: 'Product Name' },
+    product_sku: { type: 'text', linkedField: 'product_name', hint: 'Product SKU' },
+    product_name: { type: 'dropdowntext', linkedField: 'product_name', hint: 'Product Name' },
     details: { type: 'text', hint: 'Details' },
     quantity: { type: 'text', hint: 'Quantity' },
 });
